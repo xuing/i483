@@ -69,7 +69,6 @@ def sync_rtc():
             0                  # subseconds
         ))
 
-        print("✓ RTC 设置为 JST:", "{:04d}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}".format(*t[0:6]))
         print(current_time())
         return True
     except Exception as e:

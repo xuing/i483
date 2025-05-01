@@ -50,23 +50,18 @@ def main():
     
     # Ensure sensor is in clean state
     print("Initializing sensor...")
-    error = scd41.wake_up()
-    if error != NO_ERROR:
-        print(f"Error waking up sensor: {error}")
-    else:
-        print("✓ Sensor woken up")
-    
+
     error = scd41.stop_periodic_measurement()
     if error != NO_ERROR:
         print(f"Error stopping periodic measurement: {error}")
+        # reinitialize sensor
+        error = scd41.reinit()
+        if error != NO_ERROR:
+            print(f"Error reinitializing: {error}")
+        else:
+            print("[OK] Sensor reinitialized")
     else:
-        print("✓ Periodic measurement stopped")
-    
-    error = scd41.reinit()
-    if error != NO_ERROR:
-        print(f"Error reinitializing: {error}")
-    else:
-        print("✓ Sensor reinitialized")
+        print("[OK] Periodic measurement stopped")
     
     # Read sensor information
     error, serial = scd41.get_serial_number()
@@ -74,7 +69,7 @@ def main():
         print(f"Error getting serial number: {error}")
         return
     
-    print(f"✓ Sensor detected - Serial: 0x{serial:X}")
+    print(f"[OK] Sensor detected - Serial: 0x{serial:X}")
     
     # Start periodic measurement (5 second interval)
     error = scd41.start_periodic_measurement()
@@ -82,7 +77,7 @@ def main():
         print(f"Error starting periodic measurement: {error}")
         return
     
-    print("✓ Periodic measurement started")
+    print("[OK] Periodic measurement started")
     print("\n=== SCD41 CO2 Sensor Readings ===")
     print("Reading data every 5 seconds...\n")
     
@@ -131,21 +126,7 @@ def main():
     scd41.stop_periodic_measurement()
     print("\n=== Measurement Complete ===")
     print(f"Total readings: {len(readings)}")
-    
-    # Here you could add code to transmit the readings
-    # For example:
-    # transmit_data(readings)
 
-def transmit_data(readings):
-    """
-    Example function to transmit sensor data
-    You would implement your transmission logic here
-    """
-    # Example: convert readings to list of dictionaries
-    data_to_send = [reading.as_dict() for reading in readings]
-    # Then send data using your preferred method
-    # e.g., MQTT, HTTP POST, etc.
-    pass
 
 if __name__ == "__main__":
     main()
