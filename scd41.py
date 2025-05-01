@@ -301,7 +301,8 @@ class SCD41:
             return error, 0, 0, 0
         
         co2 = words[0]
-        
+
+        # Integer division optimization 65535 -> 65536
         # Convert temperature: Raw value is 175 * 2^16 * T / 65536 - 45
         # Simplified to: 175 * T / 65536 - 45
         temp_raw = words[1]
