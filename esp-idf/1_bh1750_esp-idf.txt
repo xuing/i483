@@ -1,0 +1,187 @@
+PS C:\Users\xuing\OneDrive - Japan Advanced Institute of Science and Technology\Project\I483\i2c_new>  & 'C:\Users\xuing\.espressif\python_env\idf5.4_py3.11_env\Scripts\python.exe' 'C:\Users\xuing\esp\v5.4.1\esp-idf\tools\idf_monitor.py' -p COM10 -b 115200 --toolchain-prefix xtensa-esp32-elf- --make '''C:\Users\xuing\.espressif\python_env\idf5.4_py3.11_env\Scripts\python.exe'' ''C:\Users\xuing\esp\v5.4.1\esp-idf\tools\idf.py''' --target esp32 'c:\Users\xuing\OneDrive - Japan Advanced Institute of Science and Technology\Project\I483\i2c_new\build\hello_world.elf'
+--- Warning: GDB cannot open serial ports accessed as COMx
+--- Using \\.\COM10 instead...
+--- esp-idf-monitor 1.6.2 on \\.\COM10 115200
+--- Quit: Ctrl+] | Menu: Ctrl+T | Help: Ctrl+T followed by Ctrl+H
+00,cs0_drv:0x00,hd_drv: ␦b                Usage          Type ST Offset   Length
+I (59) boot:  0 nvs              Wets Jun  8 2016 00:22:57
+
+rst:0x1 (POWERON_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:2
+load:0x3fff0030,len:6276
+load:0x40078000,len:15748
+load:0x40080400,len:4
+--- 0x40080400: _init at ??:?
+
+ho 8 tail 4 room 4
+load:0x40080404,len:3860
+entry 0x4008063c
+I (31) boot: ESP-IDF v5.4.1 2nd stage bootloader
+I (31) boot: compile time Apr 28 2025 00:27:08
+I (31) boot: Multicore bootloader
+I (32) boot: chip revision: v1.0
+I (35) boot.esp32: SPI Speed      : 40MHz
+I (39) boot.esp32: SPI Mode       : DIO
+I (42) boot.esp32: SPI Flash Size : 2MB
+I (46) boot: Enabling RNG early entropy source...
+I (50) boot: Partition Table:
+I (53) boot: ## Label            Usage          Type ST Offset   Length
+I (59) boot:  0 nvs              WiFi data        01 02 00009000 00006000
+I (66) boot:  1 phy_init         RF data          01 01 0000f000 00001000
+I (72) boot:  2 factory          factory app      00 00 00010000 00100000
+I (79) boot: End of partition table
+I (82) esp_image: segment 0: paddr=00010020 vaddr=3f400020 size=0c434h ( 50228) map
+I (107) esp_image: segment 1: paddr=0001c45c vaddr=3ff80000 size=0001ch (    28) load
+I (107) esp_image: segment 2: paddr=0001c480 vaddr=3ffb0000 size=027f4h ( 10228) load
+I (114) esp_image: segment 3: paddr=0001ec7c vaddr=40080000 size=0139ch (  5020) load
+I (120) esp_image: segment 4: paddr=00020020 vaddr=400d0020 size=18640h ( 99904) map
+I (160) esp_image: segment 5: paddr=00038668 vaddr=4008139c size=0bdbch ( 48572) load
+I (185) boot: Loaded app from partition at offset 0x10000
+I (185) boot: Disabling RNG early entropy source...
+I (196) cpu_start: Multicore app
+I (204) cpu_start: Pro cpu start user code
+I (204) cpu_start: cpu freq: 160000000 Hz
+I (204) app_init: Application information:
+I (204) app_init: Project name:     hello_world
+I (209) app_init: App version:      188b43c
+I (212) app_init: Compile time:     May  8 2025 21:28:50
+I (217) app_init: ELF file SHA256:  14fb349c7...
+I (222) app_init: ESP-IDF:          v5.4.1
+I (226) efuse_init: Min chip rev:     v0.0
+I (229) efuse_init: Max chip rev:     v3.99
+I (233) efuse_init: Chip rev:         v1.0
+I (238) heap_init: Initializing. RAM available for dynamic allocation:
+I (244) heap_init: At 3FFAE6E0 len 00001920 (6 KiB): DRAM
+I (249) heap_init: At 3FFB33E8 len 0002CC18 (179 KiB): DRAM
+I (254) heap_init: At 3FFE0440 len 00003AE0 (14 KiB): D/IRAM
+I (259) heap_init: At 3FFE4350 len 0001BCB0 (111 KiB): D/IRAM
+I (265) heap_init: At 4008D158 len 00012EA8 (75 KiB): IRAM
+I (272) spi_flash: detected chip: generic
+I (274) spi_flash: flash io: dio
+W (277) spi_flash: Detected size(4096k) larger than the size in the binary image header(2048k). Using the size in the binary image header.
+I (289) esp_core_dump_uart: Init core dump to UART
+I (294) main_task: Started on CPU0
+I (304) main_task: Calling app_main()
+I (304) kadai1-1-bh1750: Application started
+I (304) kadai1-1-bh1750: === I483 - Kadai1-1 - XU Pengfei(2510082) ===
+I (304) kadai1-1-bh1750: Setting up I2C bus...
+I (314) kadai1-1-bh1750: Scanning I2C bus for devices...
+Found device at address 0x23
+Found device at address 0x38
+Found device at address 0x62
+Found device at address 0x77
+I (334) kadai1-1-bh1750: Probing BH1750 device...
+BH1750 detected!
+I (334) kadai1-1-bh1750: BH1750 device added successfully
+I (334) kadai1-1-bh1750: Setting up BH1750 sensor...
+I (344) kadai1-1-bh1750: Turning on sensor power
+I (344) kadai1-1-bh1750: Sending command: 0x01
+I (364) kadai1-1-bh1750: Resetting sensor
+I (364) kadai1-1-bh1750: Sending command: 0x07
+I (374) kadai1-1-bh1750: Setting measurement mode: 0x10
+I (374) kadai1-1-bh1750: Sending command: 0x10
+BH1750 sensor initialization complete!
+I (524) kadai1-1-bh1750: Starting BH1750 polling task...
+I (524) main_task: Returned from app_main()
+T+1 | Light intensity: 239.17 lx
+T+2 | Light intensity: 239.17 lx
+T+3 | Light intensity: 239.17 lx
+T+4 | Light intensity: 239.17 lx
+T+5 | Light intensity: 239.17 lx
+T+6 | Light intensity: 239.17 lx
+T+7 | Light intensity: 239.17 lx
+T+8 | Light intensity: 239.17 lx
+T+9 | Light intensity: 239.17 lx
+T+10 | Light intensity: 239.17 lx
+T+11 | Light intensity: 239.17 lx
+T+12 | Light intensity: 239.17 lx
+T+13 | Light intensity: 239.17 lx
+T+14 | Light intensity: 239.17 lx
+T+15 | Light intensity: 239.17 lx
+T+16 | Light intensity: 239.17 lx
+T+17 | Light intensity: 238.33 lx
+T+18 | Light intensity: 240.00 lx
+T+19 | Light intensity: 105.00 lx
+T+20 | Light intensity: 113.33 lx
+T+21 | Light intensity: 196.67 lx
+T+22 | Light intensity: 239.17 lx
+T+23 | Light intensity: 239.17 lx
+T+24 | Light intensity: 239.17 lx
+T+25 | Light intensity: 239.17 lx
+T+26 | Light intensity: 239.17 lx
+T+27 | Light intensity: 239.17 lx
+T+28 | Light intensity: 239.17 lx
+T+29 | Light intensity: 239.17 lx
+T+30 | Light intensity: 239.17 lx
+T+31 | Light intensity: 238.33 lx
+T+32 | Light intensity: 238.33 lx
+T+33 | Light intensity: 239.17 lx
+T+34 | Light intensity: 239.17 lx
+T+35 | Light intensity: 231.67 lx
+T+36 | Light intensity: 230.83 lx
+T+37 | Light intensity: 239.17 lx
+T+38 | Light intensity: 239.17 lx
+T+39 | Light intensity: 239.17 lx
+T+40 | Light intensity: 239.17 lx
+T+41 | Light intensity: 239.17 lx
+T+42 | Light intensity: 239.17 lx
+T+43 | Light intensity: 239.17 lx
+T+44 | Light intensity: 239.17 lx
+T+45 | Light intensity: 239.17 lx
+T+46 | Light intensity: 239.17 lx
+T+47 | Light intensity: 239.17 lx
+T+48 | Light intensity: 239.17 lx
+T+49 | Light intensity: 233.33 lx
+T+50 | Light intensity: 239.17 lx
+T+51 | Light intensity: 239.17 lx
+T+52 | Light intensity: 239.17 lx
+T+53 | Light intensity: 238.33 lx
+T+54 | Light intensity: 239.17 lx
+T+55 | Light intensity: 239.17 lx
+T+56 | Light intensity: 239.17 lx
+T+57 | Light intensity: 239.17 lx
+T+58 | Light intensity: 239.17 lx
+T+59 | Light intensity: 239.17 lx
+T+60 | Light intensity: 239.17 lx
+T+61 | Light intensity: 239.17 lx
+T+62 | Light intensity: 239.17 lx
+T+63 | Light intensity: 237.50 lx
+T+64 | Light intensity: 239.17 lx
+T+65 | Light intensity: 236.67 lx
+T+66 | Light intensity: 239.17 lx
+T+67 | Light intensity: 236.67 lx
+T+68 | Light intensity: 236.67 lx
+T+69 | Light intensity: 239.17 lx
+T+70 | Light intensity: 239.17 lx
+T+71 | Light intensity: 239.17 lx
+T+72 | Light intensity: 239.17 lx
+T+73 | Light intensity: 238.33 lx
+T+74 | Light intensity: 239.17 lx
+T+75 | Light intensity: 239.17 lx
+T+76 | Light intensity: 239.17 lx
+T+77 | Light intensity: 239.17 lx
+T+78 | Light intensity: 239.17 lx
+T+79 | Light intensity: 239.17 lx
+T+80 | Light intensity: 239.17 lx
+T+81 | Light intensity: 239.17 lx
+T+82 | Light intensity: 239.17 lx
+T+83 | Light intensity: 239.17 lx
+T+84 | Light intensity: 239.17 lx
+T+85 | Light intensity: 239.17 lx
+T+86 | Light intensity: 239.17 lx
+T+87 | Light intensity: 239.17 lx
+T+88 | Light intensity: 239.17 lx
+T+89 | Light intensity: 239.17 lx
+T+90 | Light intensity: 239.17 lx
+T+91 | Light intensity: 239.17 lx
+T+92 | Light intensity: 239.17 lx
+T+93 | Light intensity: 239.17 lx
+T+94 | Light intensity: 239.17 lx
+T+95 | Light intensity: 239.17 lx
+T+96 | Light intensity: 239.17 lx
+T+97 | Light intensity: 239.17 lx
+T+98 | Light intensity: 239.17 lx
+T+99 | Light intensity: 239.17 lx
+T+100 | Light intensity: 239.17 lx

@@ -1,0 +1,27 @@
+>>> === RPR-0521RS Sensor Example ===
+RPR-0521RS sensor initialized successfully!
+
+=== RPR-0521RS Sensor Readings ===
+   Proximity    |   Light (lux)
+-----------------------------------
+      65 ( FAR) |         97.80
+      65 ( FAR) |         97.80
+      73 ( FAR) |         68.30
+      64 ( FAR) |         68.50
+      65 ( FAR) |         97.80
+      86 ( FAR) |         13.07
+      73 ( FAR) |         39.20
+      65 ( FAR) |         96.12
+      65 ( FAR) |         97.80
+      65 ( FAR) |         97.80
+      72 ( FAR) |         96.12
+      65 ( FAR) |         97.80
+      65 ( FAR) |         97.80
+      65 ( FAR) |         97.80
+      65 ( FAR) |         97.80
+      79 ( FAR) |          4.85
+      65 ( FAR) |         96.12
+      65 ( FAR) |         96.12
+      65 ( FAR) |         96.12
+      65 ( FAR) |         96.12
+      65 ( FAR) |         96.12

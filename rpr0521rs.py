@@ -1,5 +1,6 @@
 # SPDX-FileCopyrightText: Copyright (c) 2025 XU pengfei
 # SPDX-License-Identifier: MIT
+import time
 
 from micropython import const
 
@@ -59,38 +60,6 @@ ALS_MEASUREMENT_TIME_TABLE = [0, 0, 0, 0, 0, 100, 100, 100, 100, 100, 400, 400, 
 
 
 class RPR0521RS:
-    """Driver for the RPR-0521RS Ambient Light and Proximity Sensor.
-    
-    :param ~machine.I2C i2c: The I2C bus the RPR-0521RS is connected to.
-    :param int address: The I2C device address. Defaults to :const:`0x38`
-    
-    :raises RuntimeError: if the sensor is not found
-    
-    **Quickstart: Importing and using the device**
-    
-    Here is an example of using the :class:[RPR0521RS](cci:1://file:///c:/Users/xuing/OneDrive%20-%20Japan%20Advanced%20Institute%20of%20Science%20and%20Technology/Project/I483/kadai1/RPR-0521RS/RPR-0521RS.h:61:6-61:22) class.
-    First you will need to import the libraries to use the sensor
-    
-    .. code-block:: python
-    
-        from machine import Pin, I2C
-        import rpr0521rs as rpr0521rs
-    
-    Once this is done you can define your `machine.I2C` object and define your sensor object
-    
-    .. code-block:: python
-    
-        i2c = I2C(1, sda=Pin(2), scl=Pin(3))
-        sensor = rpr0521rs.RPR0521RS(i2c)
-    
-    Now you have access to the :attr:`proximity`, :attr:`ambient_light` attributes
-    
-    .. code-block:: python
-    
-        proximity = sensor.proximity
-        ambient_light = sensor.ambient_light
-    """
-    
     # Register definitions
     _system_control = RegisterStruct(RPR0521RS_SYSTEM_CONTROL, ">B")
     _mode_control = RegisterStruct(RPR0521RS_MODE_CONTROL, ">B")
@@ -261,16 +230,6 @@ if __name__ == "__main__":
     # Initialize I2C
     i2c = I2C(0, scl=Pin(22), sda=Pin(21), freq=400000)
     
-    # Scan I2C bus
-    devices = i2c.scan()
-    if devices:
-        print(f"Found {len(devices)} devices on I2C bus:")
-        for device in devices:
-            print(f"  Device address: 0x{device:02X}")
-    else:
-        print("No devices found on I2C bus, please check connections")
-        raise SystemExit
-    
     try:
         # Initialize RPR-0521RS at default address 0x38
         sensor = RPR0521RS(i2c)
@@ -284,7 +243,7 @@ if __name__ == "__main__":
     print("-" * 35)
     
     try:
-        for _ in range(10):  # Read 10 samples
+        for _ in range(100):  # Read 10 samples
             proximity = sensor.proximity
             light = sensor.ambient_light
             
