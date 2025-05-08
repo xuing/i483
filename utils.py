@@ -58,9 +58,9 @@ def sync_rtc():
         ntptime.host = NTP_SERVER
         ntptime.settime()
 
-        # 加上时区偏移
+        # Add timezone offset
         ts = time.time() + 9 * 3600
-        t = time.gmtime(ts)  # 改成 gmtime，确保 t 是 JST 时间结构
+        t = time.gmtime(ts)  # Change to gmtime to ensure t is JST time structure
 
         rtc.datetime((
             t[0], t[1], t[2],  # year, month, day

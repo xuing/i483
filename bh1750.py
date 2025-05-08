@@ -23,7 +23,7 @@ class BH1750:
         self.i2c = i2c
         self.address = address
         self._mode = mode
-        self._measurement_accuracy = 1.0  # 默认因子为1.0, 若需要可根据实际校准调整
+        self._measurement_accuracy = 1.0  # Default factor is 1.0, can be adjusted according to actual calibration if needed
 
     def power(self, on: bool = True):
         """Enable or disable sensor power"""
