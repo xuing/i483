@@ -1,0 +1,76 @@
+== I483 - Kadai1 - XU Pengfei(2510082) ===
+Multi-sensor Data Acquisition System
+MAC address: 24:62:AB:E1:23:24
+Connecting to WiFi...
+WiFi connection successful
+IP address: 172.20.10.10
+Syncing RTC time...
+2025-05-08 23:11:14
+
+=== Initializing Sensors ===
+[OK] SCD41 CO2 sensor initialized successfully
+[OK] BH1750 light sensor initialized successfully
+[OK] RPR0521RS ambient light/proximity sensor initialized successfully
+[OK] DPS310 pressure/temperature sensor initialized successfully
+
+Starting to read sensor data...
+Press Ctrl+C to stop the program
+
+=== Sensor Data [2025-05-08 23:11:14] ===
+BH1750 Light Sensor:
+  Illuminance: 115.00 lx
+RPR0521RS Ambient Light/Proximity Sensor:
+  Ambient Light: 73.35 lx
+  Proximity: 77
+DPS310 Pressure/Temperature Sensor:
+  Temperature: -3.51 °C
+  Pressure: 1001.47 hPa
+  Altitude: 98.51 m
+
+=== Sensor Data [2025-05-08 23:11:19] ===
+SCD41 CO2 Sensor:
+  CO2: 2040 ppm
+  Temperature: 26.83 °C
+  Humidity: 44.75 %
+BH1750 Light Sensor:
+  Illuminance: 115.00 lx
+RPR0521RS Ambient Light/Proximity Sensor:
+  Ambient Light: 73.35 lx
+  Proximity: 77
+DPS310 Pressure/Temperature Sensor:
+  Temperature: -3.78 °C
+  Pressure: 1001.44 hPa
+  Altitude: 98.78 m
+
+=== Sensor Data [2025-05-08 23:11:24] ===
+SCD41 CO2 Sensor:
+  CO2: 2030 ppm
+  Temperature: 26.38 °C
+  Humidity: 45.51 %
+BH1750 Light Sensor:
+  Illuminance: 115.00 lx
+RPR0521RS Ambient Light/Proximity Sensor:
+  Ambient Light: 73.35 lx
+  Proximity: 78
+DPS310 Pressure/Temperature Sensor:
+  Temperature: -3.79 °C
+  Pressure: 1001.44 hPa
+  Altitude: 98.78 m
+
+=== Sensor Data [2025-05-08 23:11:29] ===
+SCD41 CO2 Sensor:
+  CO2: 2034 ppm
+  Temperature: 26.12 °C
+  Humidity: 46.26 %
+BH1750 Light Sensor:
+  Illuminance: 115.00 lx
+RPR0521RS Ambient Light/Proximity Sensor:
+  Ambient Light: 73.35 lx
+  Proximity: 77
+DPS310 Pressure/Temperature Sensor:
+  Temperature: -3.77 °C
+  Pressure: 1001.44 hPa
+  Altitude: 98.79 m
+
+Program stopped
+Cleaning up resources.
