@@ -1,7 +1,7 @@
 from machine import I2C, Pin
 import time
 
-# 定义各个工作模式的常量
+# Define constants for each operating mode
 CONT_H_RES_MODE = 0x10  # Continuous high resolution mode (1 lx)
 CONT_H_RES_MODE2 = 0x11  # Continuous high resolution mode 2 (0.5 lx)
 CONT_L_RES_MODE = 0x13  # Continuous low resolution mode (4 lx)
@@ -11,8 +11,8 @@ ONE_TIME_L_RES_MODE = 0x23  # One-time low resolution mode (4 lx)
 
 
 class BH1750:
-    """基于 MicroPython I2C 的 BH1750 环境光传感器驱动。
-    参考文档：bh1750fvi-e-186247.pdf
+    """BH1750 ambient light sensor driver based on MicroPython I2C.
+    Reference document: bh1750fvi-e-186247.pdf
     """
 
     PWR_DOWN = 0x00
@@ -26,29 +26,29 @@ class BH1750:
         self._measurement_accuracy = 1.0  # 默认因子为1.0, 若需要可根据实际校准调整
 
     def power(self, on: bool = True):
-        """使能或关闭传感器电源"""
+        """Enable or disable sensor power"""
         cmd = self.PWR_ON if on else self.PWR_DOWN
         self._send_cmd(cmd)
-        # 根据 datasheet，Power On 后建议等待至少10ms
+        # According to the datasheet, it's recommended to wait at least 10ms after Power On
         time.sleep_ms(10)
 
     def reset(self):
-        """重置传感器，只有在上电状态下有效"""
+        """Reset the sensor, only effective when powered on"""
         self._send_cmd(self.RESET)
-        # datasheet建议重置后等待10ms以上
+        # Datasheet recommends waiting more than 10ms after reset
         time.sleep_ms(10)
 
     def set_mode(self, mode=None):
-        """设置传感器测量模式，可选模式由常量定义"""
+        """Set sensor measurement mode, available modes are defined by constants"""
         if mode is not None:
             self._mode = mode
         self._send_cmd(self._mode)
-        # 对于连续高分辨率模式，第一次采样后建议等待约150ms
+        # For continuous high resolution modes, it's recommended to wait about 150ms after the first sampling
         if self._mode in (CONT_H_RES_MODE, CONT_H_RES_MODE2):
             time.sleep_ms(150)
         elif self._mode in (CONT_L_RES_MODE,):
             time.sleep_ms(20)
-        # 如果使用一次性模式，则调用后需重新触发测量
+        # If using one-time mode, measurement needs to be triggered again after calling
 
     def _send_cmd(self, cmd: int):
         try:
@@ -57,8 +57,8 @@ class BH1750:
             print("Error sending command:", e)
 
     def read_light(self) -> float:
-        """读取传感器返回数据，计算光照强度（单位：lux）
-        datasheet中给出的换算公式：lux = (测量值) / 1.2 / measurement_accuracy
+        """Read sensor data and calculate light intensity (unit: lux)
+        Conversion formula from datasheet: lux = (measured value) / 1.2 / measurement_accuracy
         """
         try:
             raw = self.i2c.readfrom(self.address, 2)
@@ -80,21 +80,21 @@ class BH1750:
         self._measurement_accuracy = val
 
     def power_down(self):
-        """关闭传感器以降低功耗"""
+        """Turn off the sensor to reduce power consumption"""
         self.power(False)
 
 
 def main():
-    # 初始化 I2C (根据实际硬件设置正确的 scl 和 sda 引脚)
+    # Initialize I2C (set the correct scl and sda pins according to actual hardware)
     i2c = I2C(0, scl=Pin(22), sda=Pin(21))
 
-    # 创建 BH1750 实例，选择连续高分辨率模式
+    # Create BH1750 instance, select continuous high resolution mode
     sensor = BH1750(i2c, mode=CONT_H_RES_MODE)
 
-    # 打开传感器电源并初始化
+    # Turn on sensor power and initialize
     sensor.power(True)
     sensor.reset()
-    sensor.set_mode()  # 此处等待已内置
+    sensor.set_mode()  # Wait time is already built-in here
 
     try:
         while True:
@@ -103,10 +103,10 @@ def main():
                 print(f"Illuminance: {lux:.2f} lx")
             else:
                 print("Failed to read sensor data.")
-            # 轮询间隔可根据实际需求设置，确保大于传感器转换时间
+            # Polling interval can be set according to actual needs, ensure it's greater than sensor conversion time
             time.sleep(1)
     except KeyboardInterrupt:
-        # 程序退出时关闭传感器
+        # Turn off the sensor when exiting the program
         sensor.power_down()
         print("Sensor powered down.")
 
