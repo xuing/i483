@@ -4,8 +4,16 @@ import time
 from machine import RTC
 
 # WiFi configuration
-WIFI_SSID = "佑希柯のスマホ"  # Please change to your WiFi SSID
-WIFI_PASSWORD = "xuing233"  # Please change to your WiFi password
+# List of WiFi networks to try in order [(ssid1, password1), (ssid2, password2), ...]
+WIFI_NETWORKS = [
+    ("佑希柯のスマホ", "xuing233"),  # Primary network - ASCII name to avoid encoding issues
+    ("JAISTALL", ""),  # Backup network 1
+    # ("eduroam", "edu_password"),      # Backup network 2
+    # Add more networks as needed
+]
+
+# Maximum number of connection attempts per WiFi network
+MAX_CONNECTION_ATTEMPTS = 3  # Try each network this many times before moving to next one
 
 # NTP server configuration
 NTP_SERVER = "ntp.nict.jp"  # Japan standard time server, can be changed as needed
@@ -21,32 +29,60 @@ def show_mac_address():
     print("MAC address:", mac_str)
 
 
-def connect_wifi(ssid=WIFI_SSID, password=WIFI_PASSWORD):
-    """Connect to Wi-Fi network"""
+def connect_wifi():
+    """Connect to Wi-Fi network using the predefined WIFI_NETWORKS list
+    
+    Returns:
+        bool: True if connection successful, False otherwise
+    """
     print("Connecting to WiFi...")
     wlan = network.WLAN(network.STA_IF)
     wlan.active(True)
-
-    if not wlan.isconnected():
-        print(f"Connecting to network: {ssid}")
-        wlan.connect(ssid, password)
-
-        # Wait for connection or timeout
-        max_wait = 20
-        while max_wait > 0:
-            if wlan.isconnected():
-                break
-            max_wait -= 1
-            print("Waiting for connection...")
-            time.sleep(1)
-
+    
+    # If already connected, return True
     if wlan.isconnected():
-        print("WiFi connection successful")
+        print("Already connected to WiFi")
         print(f"IP address: {wlan.ifconfig()[0]}")
         return True
-    else:
-        print("WiFi connection failed")
-        return False
+    
+    # Try to connect to each network in the list
+    for network_ssid, network_password in WIFI_NETWORKS:
+        # Try connecting to this network multiple times
+        for attempt in range(1, MAX_CONNECTION_ATTEMPTS + 1):
+            try:
+                print(f"Attempting to connect to network: {network_ssid} (Attempt {attempt}/{MAX_CONNECTION_ATTEMPTS})")
+                wlan.connect(network_ssid, network_password)
+                
+                # Wait for connection or timeout
+                max_wait = 20
+                while max_wait > 0:
+                    if wlan.isconnected():
+                        print("WiFi connection successful")
+                        print(f"IP address: {wlan.ifconfig()[0]}")
+                        return True
+                    max_wait -= 1
+                    print("Waiting for connection...")
+                    time.sleep(1)
+                
+                print(f"Failed to connect to {network_ssid} on attempt {attempt}/{MAX_CONNECTION_ATTEMPTS}")
+                # If we've reached the maximum number of attempts, move to the next network
+                if attempt < MAX_CONNECTION_ATTEMPTS:
+                    print("Retrying...")
+                    time.sleep(2)  # Wait before retrying
+                else:
+                    print("Maximum connection attempts reached, trying next network if available...")
+            except OSError as e:
+                print(f"WiFi connection error for {network_ssid}: {e} (Attempt {attempt}/{MAX_CONNECTION_ATTEMPTS})")
+                # If we've reached the maximum number of attempts, move to the next network
+                if attempt < MAX_CONNECTION_ATTEMPTS:
+                    print("Retrying after error...")
+                    time.sleep(2)  # Wait before retrying
+                else:
+                    print("Maximum connection attempts reached, trying next network if available...")
+                    time.sleep(2)  # Give some time before trying the next network
+    
+    print("WiFi connection failed for all networks")
+    return False
 
 
 def sync_rtc():
