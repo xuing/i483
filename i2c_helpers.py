@@ -65,7 +65,7 @@ class CBits:
         obj,
         objtype=None,
     ) -> int:
-        mem_value = obj._i2c.readfrom_mem(obj._address, self.register, self.lenght)
+        mem_value = obj.i2c.readfrom_mem(obj.address, self.register, self.lenght)
 
         reg = 0
         order = range(len(mem_value) - 1, -1, -1)
@@ -79,7 +79,7 @@ class CBits:
         return reg
 
     def __set__(self, obj, value: int) -> None:
-        memory_value = obj._i2c.readfrom_mem(obj._address, self.register, self.lenght)
+        memory_value = obj.i2c.readfrom_mem(obj.address, self.register, self.lenght)
 
         reg = 0
         order = range(len(memory_value) - 1, -1, -1)
@@ -93,7 +93,7 @@ class CBits:
         reg |= value
         reg = reg.to_bytes(self.lenght, "big")
 
-        obj._i2c.writeto_mem(obj._address, self.register, reg)
+        obj.i2c.writeto_mem(obj.address, self.register, reg)
 
 
 class RegisterStruct:
@@ -115,19 +115,19 @@ class RegisterStruct:
             value = struct.unpack(
                 self.format,
                 memoryview(
-                    obj._i2c.readfrom_mem(obj._address, self.register, self.lenght)
+                    obj.i2c.readfrom_mem(obj.address, self.register, self.lenght)
                 ),
             )[0]
         else:
             value = struct.unpack(
                 self.format,
                 memoryview(
-                    obj._i2c.readfrom_mem(obj._address, self.register, self.lenght)
+                    obj.i2c.readfrom_mem(obj.address, self.register, self.lenght)
                 ),
             )
         return value
 
     def __set__(self, obj, value):
         mem_value = struct.pack(self.format, value)
-        obj._i2c.writeto_mem(obj._address, self.register, mem_value)
+        obj.i2c.writeto_mem(obj.address, self.register, mem_value)
 

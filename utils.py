@@ -20,6 +20,7 @@ NTP_SERVER = "ntp.nict.jp"  # Japan standard time server, can be changed as need
 
 rtc = RTC()
 
+
 def show_mac_address():
     """Show MAC address"""
     wlan = network.WLAN(network.STA_IF)
@@ -38,19 +39,19 @@ def connect_wifi():
     print("Connecting to WiFi...")
     wlan = network.WLAN(network.STA_IF)
     wlan.active(True)
-    
+
     # If already connected, return True
     if wlan.isconnected():
         print("Already connected to WiFi")
         print(f"IP address: {wlan.ifconfig()[0]}")
         return True
-    
+
     for attempt in range(1, MAX_CONNECTION_ATTEMPTS + 1):
         for network_ssid, network_password in WIFI_NETWORKS:
             try:
                 print(f"Attempting to connect to network: {network_ssid} (Attempt {attempt}/{MAX_CONNECTION_ATTEMPTS})")
                 wlan.connect(network_ssid, network_password)
-                
+
                 # Wait for connection or timeout
                 max_wait = 20
                 while max_wait > 0:
@@ -61,7 +62,7 @@ def connect_wifi():
                     max_wait -= 1
                     print("Waiting for connection...")
                     time.sleep(1)
-                
+
                 print(f"Failed to connect to {network_ssid} on attempt {attempt}/{MAX_CONNECTION_ATTEMPTS}")
                 # If we've reached the maximum number of attempts, move to the next network
                 if attempt < MAX_CONNECTION_ATTEMPTS:
@@ -78,7 +79,7 @@ def connect_wifi():
                 else:
                     print("Maximum connection attempts reached, trying next network if available...")
                     time.sleep(2)  # Give some time before trying the next network
-    
+
     print("WiFi connection failed for all networks")
     return False
 
@@ -98,9 +99,9 @@ def sync_rtc():
 
         rtc.datetime((
             t[0], t[1], t[2],  # year, month, day
-            t[6],              # weekday
+            t[6],  # weekday
             t[3], t[4], t[5],  # hour, min, sec
-            0                  # subseconds
+            0  # subseconds
         ))
 
         print(current_time())
@@ -120,4 +121,3 @@ def current_time():
 def print_time():
     """Print current time"""
     print(f"Current time: {current_time()}")
-

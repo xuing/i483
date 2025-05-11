@@ -69,8 +69,8 @@ class RPR0521RS:
     
     def __init__(self, i2c, address=RPR0521RS_DEVICE_ADDRESS):
         """Initialize the RPR-0521RS sensor."""
-        self._i2c = i2c
-        self._address = address
+        self.i2c = i2c
+        self.address = address
         
         # Verify device
         try:
@@ -125,7 +125,7 @@ class RPR0521RS:
         """
         # Read 6 bytes starting from PS_DATA_LSB register
         buffer = bytearray(6)
-        self._i2c.readfrom_mem_into(self._address, RPR0521RS_PS_DATA_LSB, buffer)
+        self.i2c.readfrom_mem_into(self.address, RPR0521RS_PS_DATA_LSB, buffer)
         
         # Parse the data
         ps_data = buffer[0] | (buffer[1] << 8)
