@@ -1,6 +1,7 @@
 from machine import I2C, Pin
 import time
-from sensor_base import Sensor
+
+from sensor import Sensor
 
 # Define constants for each operating mode
 CONT_H_RES_MODE = 0x10  # Continuous high resolution mode (1 lx)
@@ -24,7 +25,7 @@ class BH1750(Sensor):
 
     def __init__(self, i2c: I2C, address=0x23, mode=CONT_H_RES_MODE):
         # Initialize the base class
-        super().__init__(i2c, "bh1750", addr=address)
+        super().__init__(i2c, "BH1750", addr=address)
         self._mode = mode
         self._measurement_accuracy = 1.0  # Default factor is 1.0, can be adjusted according to actual calibration if needed
 
@@ -93,7 +94,7 @@ class BH1750(Sensor):
         try:
             lux = self.read_light()
             if lux >= 0:
-                data = {"light": lux, "unit": "lx"}
+                data = {"illumination": lux}
                 self.data = data
                 self.last_read_time = time.time()
                 return data
@@ -183,7 +184,7 @@ def main():
         while True:
             data = sensor.read_data()
             if data:
-                print(f"Illuminance: {data['light']:.2f} {data['unit']}")
+                print(f"Illuminance: {data['illumination']:.2f} lx")
             else:
                 print("Failed to read sensor data.")
             # Polling interval can be set according to actual needs
