@@ -1,5 +1,6 @@
 from machine import I2C, Pin
 import time
+from sensor_base import Sensor
 
 # Define constants for each operating mode
 CONT_H_RES_MODE = 0x10  # Continuous high resolution mode (1 lx)
@@ -10,9 +11,11 @@ ONE_TIME_H_RES_MODE2 = 0x21  # One-time high resolution mode 2 (0.5 lx)
 ONE_TIME_L_RES_MODE = 0x23  # One-time low resolution mode (4 lx)
 
 
-class BH1750:
+class BH1750(Sensor):
     """BH1750 ambient light sensor driver based on MicroPython I2C.
     Reference document: bh1750fvi-e-186247.pdf
+    
+    Inherits from Sensor base class to provide a standardized interface.
     """
 
     PWR_DOWN = 0x00
@@ -20,10 +23,84 @@ class BH1750:
     RESET = 0x07
 
     def __init__(self, i2c: I2C, address=0x23, mode=CONT_H_RES_MODE):
-        self.i2c = i2c
-        self.address = address
+        # Initialize the base class
+        super().__init__(i2c, "bh1750", addr=address)
         self._mode = mode
         self._measurement_accuracy = 1.0  # Default factor is 1.0, can be adjusted according to actual calibration if needed
+
+    def initialize(self):
+        """Initialize the BH1750 sensor
+        
+        Implementation of abstract method from Sensor base class
+        """
+        try:
+            self.power(True)
+            self.reset()
+            self.set_mode(self._mode)
+            self.initialized = True
+            return True
+        except Exception as e:
+            print(f"[ERROR] {self.name} initialization failed: {e}")
+            return False
+
+    def start(self):
+        """Start data collection
+        
+        Implementation of abstract method from Sensor base class
+        """
+        if not self.initialized:
+            print(f"[ERROR] {self.name} not initialized")
+            return False
+            
+        try:
+            # BH1750 is already in continuous measurement mode after initialization
+            # No additional action needed to start
+            self.running = True
+            return True
+        except Exception as e:
+            print(f"[ERROR] {self.name} start failed: {e}")
+            return False
+
+    def stop(self):
+        """Stop data collection
+        
+        Implementation of abstract method from Sensor base class
+        """
+        if not self.running:
+            return True
+            
+        try:
+            # Power down the sensor to stop measurements
+            self.power_down()
+            self.running = False
+            return True
+        except Exception as e:
+            print(f"[ERROR] {self.name} stop failed: {e}")
+            return False
+
+    def read_data(self):
+        """Read sensor data
+        
+        Implementation of abstract method from Sensor base class
+        
+        Returns:
+            Dictionary containing light intensity data
+        """
+        if not self.running:
+            print(f"[ERROR] {self.name} not running")
+            return {}
+            
+        try:
+            lux = self.read_light()
+            if lux >= 0:
+                data = {"light": lux, "unit": "lx"}
+                self.data = data
+                self.last_read_time = time.time()
+                return data
+            return {}
+        except Exception as e:
+            print(f"[ERROR] {self.name} read data failed: {e}")
+            return {}
 
     def power(self, on: bool = True):
         """Enable or disable sensor power"""
@@ -54,7 +131,7 @@ class BH1750:
         try:
             self.i2c.writeto(self.address, bytes([cmd]))
         except Exception as e:
-            print("Error sending command:", e)
+            print(f"[ERROR] {self.name} error sending command: {e}")
 
     def read_light(self) -> float:
         """Read sensor data and calculate light intensity (unit: lux)
@@ -66,7 +143,7 @@ class BH1750:
             lux = raw_val / 1.2 / self._measurement_accuracy
             return lux
         except Exception as e:
-            print("Error reading light level:", e)
+            print(f"[ERROR] {self.name} error reading light level: {e}")
             return -1.0
 
     @property
@@ -88,27 +165,33 @@ def main():
     # Initialize I2C (set the correct scl and sda pins according to actual hardware)
     i2c = I2C(0, scl=Pin(22), sda=Pin(21))
 
-    # Create BH1750 instance, select continuous high resolution mode
+    # Create BH1750 instance
     sensor = BH1750(i2c, mode=CONT_H_RES_MODE)
 
-    # Turn on sensor power and initialize
-    sensor.power(True)
-    sensor.reset()
-    sensor.set_mode()  # Wait time is already built-in here
+    # Initialize and start the sensor
+    if not sensor.initialize():
+        print("Failed to initialize sensor.")
+        return
+    
+    if not sensor.start():
+        print("Failed to start sensor.")
+        return
+    
+    print("BH1750 sensor initialized and started successfully!")
 
     try:
         while True:
-            lux = sensor.read_light()
-            if lux >= 0:
-                print(f"Illuminance: {lux:.2f} lx")
+            data = sensor.read_data()
+            if data:
+                print(f"Illuminance: {data['light']:.2f} {data['unit']}")
             else:
                 print("Failed to read sensor data.")
-            # Polling interval can be set according to actual needs, ensure it's greater than sensor conversion time
+            # Polling interval can be set according to actual needs
             time.sleep(1)
     except KeyboardInterrupt:
-        # Turn off the sensor when exiting the program
-        sensor.power_down()
-        print("Sensor powered down.")
+        # Stop the sensor when exiting the program
+        sensor.stop()
+        print("Sensor stopped.")
 
 
 if __name__ == "__main__":

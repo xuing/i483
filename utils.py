@@ -45,10 +45,8 @@ def connect_wifi():
         print(f"IP address: {wlan.ifconfig()[0]}")
         return True
     
-    # Try to connect to each network in the list
-    for network_ssid, network_password in WIFI_NETWORKS:
-        # Try connecting to this network multiple times
-        for attempt in range(1, MAX_CONNECTION_ATTEMPTS + 1):
+    for attempt in range(1, MAX_CONNECTION_ATTEMPTS + 1):
+        for network_ssid, network_password in WIFI_NETWORKS:
             try:
                 print(f"Attempting to connect to network: {network_ssid} (Attempt {attempt}/{MAX_CONNECTION_ATTEMPTS})")
                 wlan.connect(network_ssid, network_password)

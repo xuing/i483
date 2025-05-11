@@ -48,7 +48,7 @@ class SCD41:
             addr: Sensor I2C address
         """
         self.i2c = i2c
-        self.addr = addr
+        self.address = addr
         
     def _calculate_crc(self, data):
         """
@@ -82,7 +82,7 @@ class SCD41:
         """
         try:
             cmd_bytes = [(cmd >> 8) & 0xFF, cmd & 0xFF]
-            self.i2c.writeto(self.addr, bytes(cmd_bytes))
+            self.i2c.writeto(self.address, bytes(cmd_bytes))
             return NO_ERROR
         except Exception as e:
             print(f"Error sending command: {e}")
@@ -109,7 +109,7 @@ class SCD41:
                 buffer.append(lsb)
                 buffer.append(self._calculate_crc([msb, lsb]))
                 
-            self.i2c.writeto(self.addr, bytes(buffer))
+            self.i2c.writeto(self.address, bytes(buffer))
             return NO_ERROR
         except Exception as e:
             print(f"Error sending command with arguments: {e}")
@@ -129,7 +129,7 @@ class SCD41:
         """
         try:
             # Each word requires 3 bytes (2 data bytes + 1 CRC byte)
-            data = self.i2c.readfrom(self.addr, num_words * 3)
+            data = self.i2c.readfrom(self.address, num_words * 3)
             words = []
             
             for i in range(0, len(data), 3):
