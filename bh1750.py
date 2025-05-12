@@ -127,7 +127,7 @@ def main():
         print("Failed to initialize sensor.")
         return
 
-    sensor.start()  # 启动后台读取任务
+    sensor.start()  # Start background reading task
 
     print("BH1750 sensor initialized and started successfully!")
 

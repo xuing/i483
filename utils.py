@@ -98,26 +98,26 @@ def sync_rtc():
         t = time.gmtime(ts)  # Change to gmtime to ensure t is JST time structure
 
         rtc.datetime((
-            t[0], t[1], t[2],  # year, month, day
-            t[6],  # weekday
-            t[3], t[4], t[5],  # hour, min, sec
-            0  # subseconds
+            t[0],  # Year
+            t[1],  # Month
+            t[2],  # Day
+            t[6],  # Weekday
+            t[3],  # Hour
+            t[4],  # Minute
+            t[5],  # Second
+            0      # Microsecond
         ))
 
-        print(current_time())
+        print(f"RTC time synchronized: {current_time()}")
         return True
     except Exception as e:
-        print(f"RTC time sync failed: {e}")
+        print(f"RTC time synchronization failed: {e}")
         return False
 
 
 def current_time():
-    """Get current time (already in Japan timezone)"""
-    t = rtc.datetime()
-    year, month, day, weekday, hours, minutes, seconds, _ = t
-    return "{:04d}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}".format(year, month, day, hours, minutes, seconds)
-
-
-def print_time():
-    """Print current time"""
-    print(f"Current time: {current_time()}")
+    """Get current time in format: YYYY-MM-DD HH:MM:SS"""
+    t = time.localtime()
+    return "{:04d}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}".format(
+        t[0], t[1], t[2], t[3], t[4], t[5]
+    )
