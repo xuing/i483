@@ -5,10 +5,27 @@ MPY: soft reboot
 Multi-sensor Data Acquisition System
 MAC address: 24:62:AB:E1:23:24
 Connecting to WiFi...
-Already connected to WiFi
+Attempting to connect to network: 佑希柯のスマホ (Attempt 1/3)
+E (1628297) wifi:sta is connecting, return error
+WiFi connection error for 佑希柯のスマホ: Wifi Internal Error (Attempt 1/3)
+Retrying after error...
+Attempting to connect to network: JAISTALL (Attempt 1/3)
+E (1630327) wifi:sta is connecting, return error
+WiFi connection error for JAISTALL: Wifi Internal Error (Attempt 1/3)
+Retrying after error...
+E (1630337) wifi:Set status to INIT
+Attempting to connect to network: 佑希柯のス��ホ (Attempt 2/3)
+E (1632337) wifi:sta is connecting, return error
+WiFi connection error for 佑希��のスマ��: Wifi Internal Error (Attempt 2/3)
+Retrying after error...
+Attempting to connect to network: JAISTALL (Attempt 2/3)
+Waiting for connection...
+WiFi connection successful
 IP address: 172.20.10.10
 Syncing RTC time...
-2025-05-11 22:09:16
+E (1637197) wifi:ieee80211_output.c 1345
+
+RTC time synchronization failed: -202
 
 === Initializing Sensors ===
 [OK] SCD41 CO2 sensor initialized successfully
@@ -19,149 +36,152 @@ Syncing RTC time...
 Starting to read sensor data...
 Press Ctrl+C to stop the program
 
-=== Sensor Data [2025-05-11 22:09:16] ===
+=== Sensor Data [2000-01-01 00:27:22] ===
 BH1750 Light Sensor:
-  Illuminance: 163.33 lx
+  Illuminance: 140.83 lx
 RPR0521RS Ambient Light/Proximity Sensor:
-  Ambient Light: 52.46 lx
-  Proximity: 65
+  Ambient Light: 126.47 lx
+  Proximity: 1
+  Illumination: 160.00 lx
+  Infrared Illumination: 76.00 lx
 DPS310 Pressure/Temperature Sensor:
-  Temperature: 24.10 °C
-  Pressure: 992.06 hPa
-  Altitude: 177.95 m
+  Temperature: 24.04 °C
+  Pressure: 993.77 hPa
+  Altitude: 163.49 m
 
-=== Sensor Data [2025-05-11 22:09:21] ===
+=== Sensor Data [2000-01-01 00:27:27] ===
 SCD41 CO2 Sensor:
-  CO2: 1753 ppm
-  Temperature: 26.65 ��C
-  Humidity: 50.98 %
+  CO2: 3301 ppm
+  Temperature: 27.00 °C
+  Humidity: 55.31 %
 BH1750 Light Sensor:
-  Illuminance: 163.33 lx
+  Illuminance: 139.17 lx
 RPR0521RS Ambient Light/Proximity Sensor:
-  Ambient Light: 52.46 lx
-  Proximity: 64
+  Ambient Light: 124.98 lx
+  Proximity: 1
+  Illumination: 158.00 lx
+  Infrared Illumination: 75.00 lx
+DPS310 Pressure/Temperature Sensor:
+  Temperature: 24.04 °C
+  Pressure: 993.76 hPa
+  Altitude: 163.53 m
+
+=== Sensor Data [2000-01-01 00:27:32] ===
+SCD41 CO2 Sensor:
+  CO2: 3275 ppm
+  Temperature: 26.62 °C
+  Humidity: 56.39 %
+BH1750 Light Sensor:
+  Illuminance: 138.33 lx
+RPR0521RS Ambient Light/Proximity Sensor:
+  Ambient Light: 125.18 lx
+  Proximity: 1
+  Illumination: 157.00 lx
+  Infrared Illumination: 74.00 lx
 DPS310 Pressure/Temperature Sensor:
   Temperature: 24.06 °C
-  Pressure: 992.07 hPa
-  Altitude: 177.87 m
+  Pressure: 993.77 hPa
+  Altitude: 163.45 m
 
-=== Sensor Data [2025-05-11 22:09:26] ===
+=== Sensor Data [2000-01-01 00:27:37] ===
 SCD41 CO2 Sensor:
-  CO2: 1762 ppm
-  Temperature: 26.25 °C
-  Humidity: 51.78 %
+  CO2: 3276 ppm
+  Temperature: 26.37 °C
+  Humidity: 57.22 %
 BH1750 Light Sensor:
-  Illuminance: 164.17 lx
+  Illuminance: 136.67 lx
 RPR0521RS Ambient Light/Proximity Sensor:
-  Ambient Light: 52.46 lx
-  Proximity: 65
+  Ambient Light: 123.69 lx
+  Proximity: 1
+  Illumination: 155.00 lx
+  Infrared Illumination: 73.00 lx
 DPS310 Pressure/Temperature Sensor:
   Temperature: 24.07 °C
-  Pressure: 992.06 hPa
-  Altitude: 177.90 m
+  Pressure: 993.78 hPa
+  Altitude: 163.39 m
 
-=== Sensor Data [2025-05-11 22:09:31] ===
+=== Sensor Data [2000-01-01 00:27:42] ===
 SCD41 CO2 Sensor:
-  CO2: 1766 ppm
-  Temperature: 25.96 °C
-  Humidity: 52.57 %
+  CO2: 3268 ppm
+  Temperature: 26.13 °C
+  Humidity: 58.03 %
 BH1750 Light Sensor:
-  Illuminance: 163.33 lx
+  Illuminance: 135.00 lx
 RPR0521RS Ambient Light/Proximity Sensor:
-  Ambient Light: 50.78 lx
-  Proximity: 65
+  Ambient Light: 122.20 lx
+  Proximity: 1
+  Illumination: 153.00 lx
+  Infrared Illumination: 72.00 lx
 DPS310 Pressure/Temperature Sensor:
-  Temperature: 24.06 °C
-  Pressure: 992.06 hPa
-  Altitude: 177.91 m
+  Temperature: 24.07 °C
+  Pressure: 993.78 hPa
+  Altitude: 163.34 m
 
-=== Sensor Data [2025-05-11 22:09:37] ===
+=== Sensor Data [2000-01-01 00:27:47] ===
 SCD41 CO2 Sensor:
-  CO2: 1762 ppm
-  Temperature: 25.70 °C
-  Humidity: 53.35 %
+  CO2: 3254 ppm
+  Temperature: 25.91 °C
+  Humidity: 58.75 %
 BH1750 Light Sensor:
-  Illuminance: 163.33 lx
+  Illuminance: 133.33 lx
 RPR0521RS Ambient Light/Proximity Sensor:
-  Ambient Light: 50.78 lx
-  Proximity: 65
+  Ambient Light: 120.72 lx
+  Proximity: 1
+  Illumination: 151.00 lx
+  Infrared Illumination: 71.00 lx
 DPS310 Pressure/Temperature Sensor:
-  Temperature: 24.06 °C
-  Pressure: 992.06 hPa
-  Altitude: 177.95 m
+  Temperature: 24.08 °C
+  Pressure: 993.78 hPa
+  Altitude: 163.35 m
 
-=== Sensor Data [2025-05-11 22:09:42] ===
+=== Sensor Data [2000-01-01 00:27:52] ===
 SCD41 CO2 Sensor:
-  CO2: 1780 ppm
-  Temperature: 25.44 °C
-  Humidity: 54.05 %
+  CO2: 3246 ppm
+  Temperature: 25.68 °C
+  Humidity: 59.45 %
 BH1750 Light Sensor:
-  Illuminance: 163.33 lx
+  Illuminance: 130.00 lx
 RPR0521RS Ambient Light/Proximity Sensor:
-  Ambient Light: 50.78 lx
-  Proximity: 65
+  Ambient Light: 120.72 lx
+  Proximity: 1
+  Illumination: 151.00 lx
+  Infrared Illumination: 71.00 lx
 DPS310 Pressure/Temperature Sensor:
-  Temperature: 24.04 °C
-  Pressure: 992.05 hPa
-  Altitude: 177.97 m
+  Temperature: 24.09 °C
+  Pressure: 993.78 hPa
+  Altitude: 163.36 m
 
-=== Sensor Data [2025-05-11 22:09:47] ===
+=== Sensor Data [2000-01-01 00:27:57] ===
 SCD41 CO2 Sensor:
-  CO2: 1786 ppm
-  Temperature: 25.21 °C
-  Humidity: 54.76 %
+  CO2: 3249 ppm
+  Temperature: 25.50 ��C
+  Humidity: 60.09 %
 BH1750 Light Sensor:
-  Illuminance: 163.33 lx
+  Illuminance: 130.83 lx
 RPR0521RS Ambient Light/Proximity Sensor:
-  Ambient Light: 50.78 lx
-  Proximity: 65
+  Ambient Light: 119.23 lx
+  Proximity: 1
+  Illumination: 149.00 lx
+  Infrared Illumination: 70.00 lx
 DPS310 Pressure/Temperature Sensor:
-  Temperature: 24.05 °C
-  Pressure: 992.05 hPa
-  Altitude: 177.97 m
+  Temperature: 24.09 °C
+  Pressure: 993.76 hPa
+  Altitude: 163.51 m
 
-=== Sensor Data [2025-05-11 22:09:52] ===
+=== Sensor Data [2000-01-01 00:28:02] ===
 SCD41 CO2 Sensor:
-  CO2: 1786 ppm
-  Temperature: 25.01 °C
-  Humidity: 55.35 %
+  CO2: 3253 ppm
+  Temperature: 25.30 °C
+  Humidity: 60.68 %
 BH1750 Light Sensor:
-  Illuminance: 163.33 lx
+  Illuminance: 130.00 lx
 RPR0521RS Ambient Light/Proximity Sensor:
-  Ambient Light: 52.46 lx
-  Proximity: 65
+  Ambient Light: 119.23 lx
+  Proximity: 1
+  Illumination: 149.00 lx
+  Infrared Illumination: 70.00 lx
 DPS310 Pressure/Temperature Sensor:
-  Temperature: 24.05 °C
-  Pressure: 992.05 hPa
-  Altitude: 177.99 m
-
-=== Sensor Data [2025-05-11 22:09:57] ===
-SCD41 CO2 Sensor:
-  CO2: 1785 ppm
-  Temperature: 24.78 °C
-  Humidity: 55.90 %
-BH1750 Light Sensor:
-  Illuminance: 163.33 lx
-RPR0521RS Ambient Light/Proximity Sensor:
-  Ambient Light: 52.46 lx
-  Proximity: 65
-DPS310 Pressure/Temperature Sensor:
-  Temperature: 24.04 °C
-  Pressure: 992.05 hPa
-  Altitude: 178.00 m
-
-=== Sensor Data [2025-05-11 22:10:02] ===
-SCD41 CO2 Sensor:
-  CO2: 1784 ppm
-  Temperature: 24.61 °C
-  Humidity: 56.45 %
-BH1750 Light Sensor:
-  Illuminance: 163.33 lx
-RPR0521RS Ambient Light/Proximity Sensor:
-  Ambient Light: 50.78 lx
-  Proximity: 64
-DPS310 Pressure/Temperature Sensor:
-  Temperature: 24.05 °C
-  Pressure: 992.05 hPa
-  Altitude: 178.01 m
+  Temperature: 24.10 °C
+  Pressure: 993.76 hPa
+  Altitude: 163.51 m
 
