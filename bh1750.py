@@ -46,10 +46,9 @@ class BH1750(Sensor):
             return False
 
     def start(self):
-        return super().start()
+        pass
 
     def stop(self):
-        super().stop()
         self.power_down()
 
     def read_data(self):

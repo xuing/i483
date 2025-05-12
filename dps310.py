@@ -186,14 +186,12 @@ class DPS310(Sensor):
         # self._correct_temp() # Consider if this is always needed, or conditional based on errata
         self._read_calibration()
 
-        # --- MODIFICATION START ---
         # Ensure temperature sensor source for measurement matches calibration coefficient source
         self._temp_measurement_src_bit = self._calib_coeff_temp_src_bit
         if self._temperature_external_source != self._temp_measurement_src_bit:
             # print(f"Configuring temperature sensor source to: {'External MEMS' if self._temp_measurement_src_bit else 'Internal ASIC'}")
             self._temperature_external_source = self._temp_measurement_src_bit
             time.sleep(0.01)  # Allow a short time for the setting to apply if needed
-        # --- MODIFICATION END ---
 
         # Configure default settings
         self.pressure_oversample = SAMPLE_PER_SECOND_64

@@ -177,20 +177,15 @@ def main():
     print("\n=== I483 - Kadai1 - XU Pengfei(2510082) ===")
     print("Multi-sensor Data Acquisition System")
 
-    # Display MAC address
     show_mac_address()
 
-    # Connect to WiFi
     if connect_wifi():
-        # Synchronize RTC time
         sync_rtc()
     else:
         print("WiFi connection failed, unable to synchronize RTC time")
 
-    # Create sensor manager
     sensor_manager = SensorManager()
     
-    # Read and display sensor data
     print("\nStarting to read sensor data...")
     print("Press Ctrl+C to stop the program")
     
@@ -202,12 +197,10 @@ def main():
             # Display sensor data
             sensor_manager.display_sensor_data()
             
-            # Wait 5 seconds
             time.sleep(5)
     except KeyboardInterrupt:
         print("\nProgram stopped")
     finally:
-        # Clean up resources
         print("Cleaning up resources...")
 
 
