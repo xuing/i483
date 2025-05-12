@@ -111,6 +111,8 @@ class SensorManager:
                 self.sensor_data['rpr0521rs'] = {
                     'ambient_light': ambient_light,
                     'proximity': proximity,
+                    'illumination': rpr0521rs.illumination,
+                    'infrared_illumination': rpr0521rs.infrared_illumination,
                     'timestamp': timestamp
                 }
             except Exception as e:
@@ -158,6 +160,8 @@ class SensorManager:
             print("RPR0521RS Ambient Light/Proximity Sensor:")
             print(f"  Ambient Light: {data['ambient_light']:.2f} lx")
             print(f"  Proximity: {data['proximity']}")
+            print(f"  Illumination: {data['illumination']:.2f} lx")
+            print(f"  Infrared Illumination: {data['infrared_illumination']:.2f} lx")
         
         # Display DPS310 data
         if 'dps310' in self.sensor_data:

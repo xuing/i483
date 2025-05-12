@@ -66,100 +66,141 @@ class RPR0521RS:
     _als_ps_control = RegisterStruct(RPR0521RS_ALS_PS_CONTROL, ">B")
     _ps_control = RegisterStruct(RPR0521RS_PS_CONTROL, ">B")
     _manufact_id = RegisterStruct(RPR0521RS_MANUFACT_ID, ">B")
-    
+
     def __init__(self, i2c, address=RPR0521RS_DEVICE_ADDRESS):
         """Initialize the RPR-0521RS sensor."""
         self.i2c = i2c
         self.address = address
-        
+
         # Verify device
         try:
             part_id = self._system_control & 0x3F
             if part_id != RPR0521RS_PART_ID_VAL:
                 raise RuntimeError(f"Failed to find RPR-0521RS! Part ID: 0x{part_id:02X}")
-                
+
             manufact_id = self._manufact_id
             if manufact_id != RPR0521RS_MANUFACT_ID_VAL:
                 raise RuntimeError(f"Failed to find RPR-0521RS! Manufacturer ID: 0x{manufact_id:02X}")
         except Exception as e:
             raise RuntimeError("Failed to communicate with RPR-0521RS sensor") from e
-        
+
         # Initialize device
         self._init_sensor()
-    
+
     def _init_sensor(self):
         """Initialize the sensor with default settings."""
         # Set ALS/PS control register
         self._als_ps_control = RPR0521RS_ALS_PS_CONTROL_VAL
-        
+
         # Read current PS control register
         ps_control_val = self._ps_control
-        
+
         # Set PS control register
         self._ps_control = ps_control_val | RPR0521RS_PS_CONTROL_VAL
-        
+
         # Set mode control register
         self._mode_control = RPR0521RS_MODE_CONTROL_VAL
-        
+
         # Set gain values for calculations
         als_ps_control_val = self._als_ps_control
         data0_gain_index = (als_ps_control_val >> 4) & 0x03
         data1_gain_index = (als_ps_control_val >> 2) & 0x03
-        
+
         self._als_data0_gain = ALS_GAIN_TABLE[data0_gain_index]
         self._als_data1_gain = ALS_GAIN_TABLE[data1_gain_index]
-        
+
         # Set measurement time
         mode_control_val = self._mode_control
         meas_time_index = mode_control_val & 0x0F
         self._als_measure_time = ALS_MEASUREMENT_TIME_TABLE[meas_time_index]
-        
+
         # Wait for measurements to stabilize
         time.sleep(0.1)
-    
+
     def get_raw_data(self):
         """Get raw sensor data.
-        
+
         :return: Tuple containing (ps_data, als_data0, als_data1)
         :rtype: tuple
         """
         # Read 6 bytes starting from PS_DATA_LSB register
         buffer = bytearray(6)
         self.i2c.readfrom_mem_into(self.address, RPR0521RS_PS_DATA_LSB, buffer)
-        
+
         # Parse the data
         ps_data = buffer[0] | (buffer[1] << 8)
         als_data0 = buffer[2] | (buffer[3] << 8)
         als_data1 = buffer[4] | (buffer[5] << 8)
-        
+
         return (ps_data, als_data0, als_data1)
-    
+
+    def get_adjusted_data(self):
+        """Get gain and measurement time adjusted data.
+
+        :return: Tuple containing (ps_data, adjusted_data0, adjusted_data1)
+        :rtype: tuple
+        """
+        ps_data, data0, data1 = self.get_raw_data()
+
+        # Handle overflow for 50ms measurement time
+        if self._als_measure_time == 50:
+            if (data0 & 0x8000) == 0x8000:
+                data0 = 0x7FFF
+            if (data1 & 0x8000) == 0x8000:
+                data1 = 0x7FFF
+
+        # Apply gain and measurement time compensation
+        adjusted_data0 = (float(data0) * (100 / self._als_measure_time)) / self._als_data0_gain
+        adjusted_data1 = (float(data1) * (100 / self._als_measure_time)) / self._als_data1_gain
+
+        return (ps_data, adjusted_data0, adjusted_data1)
+
     @property
     def proximity(self):
         """The current proximity value.
-        
+
         :return: Proximity reading
         :rtype: int
         """
         ps_data, _, _ = self.get_raw_data()
         return ps_data
-    
+
+    @property
+    def illumination(self):
+        """The current illumination value (visible light + infrared).
+
+        :return: Illumination reading (data0 adjusted for gain and measurement time)
+        :rtype: float
+        """
+        _, adjusted_data0, _ = self.get_adjusted_data()
+        return adjusted_data0
+
+    @property
+    def infrared_illumination(self):
+        """The current infrared illumination value.
+
+        :return: Infrared illumination reading (data1 adjusted for gain and measurement time)
+        :rtype: float
+        """
+        _, _, adjusted_data1 = self.get_adjusted_data()
+        return adjusted_data1
+
     @property
     def ambient_light(self):
         """The current ambient light value in lux.
-        
+
         :return: Ambient light reading in lux
         :rtype: float
         """
         _, als_data0, als_data1 = self.get_raw_data()
-        
+
         # Convert raw values to lux
         lux = self._convert_to_lux(als_data0, als_data1)
         return lux
-    
+
     def check_proximity_status(self):
         """Check if an object is near or far based on threshold.
-        
+
         :return: RPR0521RS_NEAR_VAL (1) if object is near, RPR0521RS_FAR_VAL (0) if object is far
         :rtype: int
         """
@@ -168,39 +209,39 @@ class RPR0521RS:
             return RPR0521RS_NEAR_VAL
         else:
             return RPR0521RS_FAR_VAL
-    
+
     def _convert_to_lux(self, data0, data1):
         """Convert raw sensor data to lux value.
-        
+
         :param int data0: Raw data from channel 0
         :param int data1: Raw data from channel 1
         :return: Ambient light in lux
         :rtype: float
         """
         # Check if gain and measurement time are valid
-        if (self._als_data0_gain == 0 or 
-            self._als_data1_gain == 0 or 
-            self._als_measure_time == 0):
+        if (self._als_data0_gain == 0 or
+                self._als_data1_gain == 0 or
+                self._als_measure_time == 0):
             return RPR0521RS_ERROR
-        
+
         # Handle overflow for 50ms measurement time
         if self._als_measure_time == 50:
             if (data0 & 0x8000) == 0x8000:
                 data0 = 0x7FFF
             if (data1 & 0x8000) == 0x8000:
                 data1 = 0x7FFF
-        
+
         # Apply gain and measurement time compensation
         d0 = (float(data0) * (100 / self._als_measure_time)) / self._als_data0_gain
         d1 = (float(data1) * (100 / self._als_measure_time)) / self._als_data1_gain
-        
+
         # Avoid division by zero
         if d0 == 0:
             return 0
-        
+
         # Calculate lux based on ratio
         ratio = d1 / d0
-        
+
         # Apply appropriate formula based on ratio
         if ratio < 0.595:
             lux = (1.682 * d0 - 1.877 * d1)
@@ -212,24 +253,23 @@ class RPR0521RS:
             lux = (0.766 * d0 - 0.25 * d1)
         else:
             lux = 0
-        
+
         return lux
-    
+
     def reset(self):
         """Reset the sensor to default settings."""
         # Reset sensor by re-initializing
         self._init_sensor()
-
 
 if __name__ == "__main__":
     """Example usage of the RPR-0521RS driver."""
     from machine import I2C, Pin
 
     print("=== RPR-0521RS Sensor Example ===")
-    
+
     # Initialize I2C
     i2c = I2C(0, scl=Pin(22), sda=Pin(21), freq=400000)
-    
+
     try:
         # Initialize RPR-0521RS at default address 0x38
         sensor = RPR0521RS(i2c)
@@ -237,25 +277,28 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"Failed to initialize RPR-0521RS sensor: {e}")
         raise SystemExit
-    
+
     print("\n=== RPR-0521RS Sensor Readings ===")
-    print("{:^15} | {:^15}".format("Proximity", "Light (lux)"))
-    print("-" * 35)
-    
+    print("{:^15} | {:^15} | {:^15} | {:^15}".format(
+        "Proximity", "Light (lux)", "Illumination", "IR Illumination"))
+    print("-" * 67)
+
     try:
-        for _ in range(100):  # Read 10 samples
+        for _ in range(100):  # Read samples
             proximity = sensor.proximity
             light = sensor.ambient_light
-            
+            illumination = sensor.illumination
+            ir_illumination = sensor.infrared_illumination
+
             proximity_status = "NEAR" if sensor.check_proximity_status() == RPR0521RS_NEAR_VAL else "FAR"
-            
-            print("{:>8} ({:>4}) | {:>13.2f}".format(
-                proximity, proximity_status, light
+
+            print("{:>8} ({:>4}) | {:>13.2f} | {:>13.2f} | {:>13.2f}".format(
+                proximity, proximity_status, light, illumination, ir_illumination
             ))
-            
+
             time.sleep(1)
-    
+
     except KeyboardInterrupt:
         print("\nInterrupted by user.")
-    
+
     print("Program finished.")
