@@ -6,8 +6,9 @@ from machine import RTC
 # WiFi configuration
 # List of WiFi networks to try in order [(ssid1, password1), (ssid2, password2), ...]
 WIFI_NETWORKS = [
-    ("佑希柯のスマホ", "xuing233"),  # Primary network - ASCII name to avoid encoding issues
     ("JAISTALL", ""),  # Backup network 1
+    ("xu-nuc", "xuing233"),  # Backup network 2
+    ("佑希柯のスマホ", "xuing233"),  # Primary network - ASCII name to avoid encoding issues
     # ("eduroam", "edu_password"),      # Backup network 2
     # Add more networks as needed
 ]
