@@ -252,12 +252,20 @@ func checkCO2Threshold(co2Value float64) {
 	// Only send a message when status changes
 	if lastCo2Status != currentStatus {
 		thresholdTopic := "i483-sensors-" + studentID + "-co2_threshold-crossed"
+		avgActuatorTopic := "i483-actuators-" + studentID + "-co2_threshold-crossed"
 
 		err := writeToKafka(thresholdTopic, message)
 		if err != nil {
 			log.Printf("❗ [CO2 Threshold] Failed to publish: %v", err)
 		} else {
 			fmt.Printf("🚨 [CO2 Threshold] Status changed: %.2f ppm -> %s (sent: %s)\n",
+				co2Value, currentStatus, message)
+		}
+		err = writeToKafka(avgActuatorTopic, message)
+		if err != nil {
+			log.Printf("❗ [CO2 Threshold Actuator] Failed to publish: %v", err)
+		} else {
+			fmt.Printf("🚨 [CO2 Threshold Actuator] Status changed: %.2f ppm -> %s (sent: %s)\n",
 				co2Value, currentStatus, message)
 		}
 
