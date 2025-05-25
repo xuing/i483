@@ -11,6 +11,7 @@ import (
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 )
 
+// List of topics to subscribe to
 var topics = []string{
 	"SCD41/co2",
 	"SCD41/temperature",
@@ -25,31 +26,31 @@ var topics = []string{
 	"DPS310/altitude",
 }
 
-const studentID = "s2510082"
-const broker = "tcp://150.65.230.59:1883"
-const baseTopic = "i483/sensors/" + studentID + "/"
+const StudentID = "s2510082"
+const MqttBroker = "tcp://150.65.230.59:1883"
+const baseTopic = "i483/sensors/" + StudentID + "/"
 
 func main() {
-	opts := mqtt.NewClientOptions().AddBroker(broker)
+	opts := mqtt.NewClientOptions().AddBroker(MqttBroker)
 	opts.SetClientID("go-mqtt-subscriber")
 	opts.OnConnect = func(c mqtt.Client) {
-		fmt.Println("✅ 已连接到 MQTT 服务器")
+		fmt.Println("✅ Connected to MQTT broker")
 		for _, sub := range topics {
 			full := baseTopic + sub
 			token := c.Subscribe(full, 0, func(client mqtt.Client, msg mqtt.Message) {
 				key := strings.TrimPrefix(msg.Topic(), baseTopic)
-				fmt.Printf("📥 %s = %s\n", key, msg.Payload())
+				log.Printf("📥 %s = %s\n", key, msg.Payload())
 			})
 			token.Wait()
 			if token.Error() != nil {
-				log.Printf("❌ 订阅失败: %s: %v\n", sub, token.Error())
+				log.Printf("❌ Failed to subscribe: %s: %v\n", sub, token.Error())
 			} else {
-				log.Printf("📡 正在监听: %s\n", full)
+				log.Printf("📡 Listening to: %s\n", full)
 			}
 		}
 	}
 	opts.OnConnectionLost = func(c mqtt.Client, err error) {
-		log.Printf("⚠️ 连接丢失: %v\n", err)
+		log.Printf("⚠️ Connection lost: %v\n", err)
 	}
 
 	client := mqtt.NewClient(opts)
@@ -57,10 +58,10 @@ func main() {
 		log.Fatal(token.Error())
 	}
 
-	// 阻止程序退出
+	// Block the main thread until interruption signal received
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	<-c
-	fmt.Println("🛑 退出程序")
+	fmt.Println("🛑 Exiting program")
 	client.Disconnect(250)
 }

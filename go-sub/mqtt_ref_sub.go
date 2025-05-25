@@ -14,11 +14,11 @@ const topic = "i483/sensors/reference/#"
 const clientID = "go-ref-subscriber"
 
 func main() {
-	opts := mqtt.NewClientOptions().AddBroker(broker)
+	opts := mqtt.NewClientOptions().AddBroker(MqttBroker)
 	opts.SetClientID(clientID)
 
 	opts.OnConnect = func(c mqtt.Client) {
-		fmt.Printf("✅ 已连接 MQTT broker：%s\n", broker)
+		fmt.Printf("✅ 已连接 MQTT Mqtt_Broker：%s\n", MqttBroker)
 		if token := c.Subscribe(topic, 0, func(client mqtt.Client, msg mqtt.Message) {
 			fmt.Printf("📥 %s => %s\n", msg.Topic(), msg.Payload())
 		}); token.Wait() && token.Error() != nil {
