@@ -32,17 +32,17 @@ var sensors = []string{
 	"DPS310/altitude",
 }
 
-// 数据结构定义
+// Data structure definition
 type SensorData struct {
 	Value     float64
 	Timestamp time.Time
 }
 
-// 全局数据存储
+// Global data storage
 var (
 	illuminationData []SensorData
 	dataLock         sync.RWMutex
-	lastCo2Status    string // "above" or "below" 记录上次CO2状态
+	lastCo2Status    string // "above" or "below" records last CO2 status
 	statusLock       sync.RWMutex
 )
 
@@ -54,7 +54,7 @@ func sensorToKafka(s string) string {
 	return strings.ReplaceAll(s, "/", "-")
 }
 
-// Kafka写入函数
+// Kafka write function
 func writeToKafka(topic string, message string) error {
 	w := kafka.Writer{
 		Addr:  kafka.TCP(KafkaBroker),
@@ -78,13 +78,13 @@ func writeToKafka(topic string, message string) error {
 	return nil
 }
 
-// 解析传感器数据值
+// Parse sensor data value
 func parseValue(message string) (float64, error) {
 	value, err := strconv.ParseFloat(strings.TrimSpace(message), 64)
 	return value, err
 }
 
-// BH1750 illumination数据收集器
+// BH1750 illumination data collector
 func illuminationDataCollector() {
 	topic := makeTopic("BH1750/illumination")
 
@@ -119,21 +119,21 @@ func illuminationDataCollector() {
 			continue
 		}
 
-		// 解析数据
+		// Parse data
 		value, err := parseValue(string(m.Value))
 		if err != nil {
 			log.Printf("❗ [Illumination Collector] Failed to parse value '%s': %v", string(m.Value), err)
 			continue
 		}
 
-		// 存储数据
+		// Store data
 		dataLock.Lock()
 		illuminationData = append(illuminationData, SensorData{
 			Value:     value,
 			Timestamp: time.Now(),
 		})
 
-		// 清理5分钟以前的数据
+		// Clean up data older than 5 minutes
 		cutoff := time.Now().Add(-5 * time.Minute)
 		var filtered []SensorData
 		for _, data := range illuminationData {
@@ -148,7 +148,7 @@ func illuminationDataCollector() {
 	}
 }
 
-// CO2数据收集器
+// CO2 data collector
 func co2DataCollector() {
 	topic := makeTopic("SCD41/co2")
 
@@ -183,7 +183,7 @@ func co2DataCollector() {
 			continue
 		}
 
-		// 解析CO2数据
+		// Parse CO2 data
 		value, err := parseValue(string(m.Value))
 		if err != nil {
 			log.Printf("❗ [CO2 Collector] Failed to parse value '%s': %v", string(m.Value), err)
@@ -192,12 +192,12 @@ func co2DataCollector() {
 
 		fmt.Printf("✅ [CO2] Received: %.2f ppm\n", value)
 
-		// CO2阈值检测
+		// CO2 threshold detection
 		checkCO2Threshold(value)
 	}
 }
 
-// Rolling Average: 每30秒计算过去5分钟的平均值
+// Rolling Average: Calculate the average of the past 5 minutes every 30 seconds
 func rollingAverageProcessor() {
 	ticker := time.NewTicker(30 * time.Second)
 	defer ticker.Stop()
@@ -215,7 +215,7 @@ func rollingAverageProcessor() {
 			continue
 		}
 
-		// 计算平均值
+		// Calculate average
 		var sum float64
 		for _, data := range illuminationData {
 			sum += data.Value
@@ -223,7 +223,7 @@ func rollingAverageProcessor() {
 		average := sum / float64(dataCount)
 		dataLock.RUnlock()
 
-		// 发布平均值到Kafka
+		// Publish average to Kafka
 		avgMessage := fmt.Sprintf("%.2f", average)
 		err := writeToKafka(avgTopic, avgMessage)
 		if err != nil {
@@ -234,7 +234,7 @@ func rollingAverageProcessor() {
 	}
 }
 
-// Threshold Detection: CO2阈值检测
+// Threshold Detection: CO2 threshold detection
 func checkCO2Threshold(co2Value float64) {
 	statusLock.Lock()
 	defer statusLock.Unlock()
@@ -249,7 +249,7 @@ func checkCO2Threshold(co2Value float64) {
 		currentStatus = "below"
 		message = "no"
 	}
-	// 只有状态改变时才发送消息
+	// Only send a message when status changes
 	if lastCo2Status != currentStatus {
 		thresholdTopic := "i483-sensors-" + studentID + "-co2_threshold-crossed"
 
@@ -265,7 +265,7 @@ func checkCO2Threshold(co2Value float64) {
 	}
 }
 
-// 通用传感器数据读取器（用于显示其他传感器数据）
+// General sensor data reader (for displaying other sensor data)
 func startReader(topic string) {
 	r := kafka.NewReader(kafka.ReaderConfig{
 		Brokers:     []string{KafkaBroker},
@@ -310,21 +310,21 @@ func main() {
 	fmt.Println("   - Threshold Detection: CO2 > 700ppm alert")
 	fmt.Println()
 
-	// 初始化状态
+	// Initialize status
 	statusLock.Lock()
 	lastCo2Status = "unknown"
 	statusLock.Unlock()
 
-	// 启动专门的数据收集器
+	// Start dedicated data collectors
 	go illuminationDataCollector()
 	go co2DataCollector()
 
-	// 启动rolling average处理器
+	// Start rolling average processor
 	go rollingAverageProcessor()
 
-	//// 启动其他传感器的通用读取器
+	//// Start general readers for other sensors
 	//for _, s := range sensors {
-	//	// 跳过已经有专门处理器的传感器
+	//	// Skip sensors with dedicated processors
 	//	if s == "BH1750/illumination" || s == "SCD41/co2" {
 	//		continue
 	//	}
@@ -334,5 +334,5 @@ func main() {
 	//}
 
 	fmt.Println("✅ All processors started successfully!")
-	select {} // 永远阻塞
+	select {} // Block forever
 }
