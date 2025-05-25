@@ -1,0 +1,230 @@
+kadai2c_kafak_processor  | 🚀 Advanced Kafka Sensor Processor starting...
+kadai2c_kafak_processor  | 📋 Student ID: s2510082
+kadai2c_kafak_processor  | 🎯 Features:
+kadai2c_kafak_processor  |    - Rolling Average: BH1750 illumination (every 30s, 5min window)
+kadai2c_kafak_processor  |    - Threshold Detection: CO2 > 700ppm alert
+kadai2c_kafak_processor  |
+kadai2c_kafak_processor  | ✅ All processors started successfully!
+kadai2c_kafak_processor  | 🔄 [Rolling Average] Will publish to: i483-sensors-s2510082-BH1750_avg-illumination
+kadai2c_kafak_processor  | 📡 [Illumination Collector] Listening to: i483-sensors-s2510082-BH1750-illumination
+kadai2c_kafak_processor  | 📡 [CO2 Collector] Listening to: i483-sensors-s2510082-SCD41-co2
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 158.33 (stored 1 values)
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 158.33 (stored 2 values)
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 158.33 (stored 3 values)
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 158.33 (stored 4 values)
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 158.33 (stored 5 values)
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 158.33 (stored 6 values)
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 158.33 (stored 7 values)
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 158.33 (stored 8 values)
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 156.67 (stored 9 values)
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 157.50 (stored 10 values)
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 123.33 (stored 11 values)
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 150.00 (stored 12 values)
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 157.50 (stored 13 values)
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 158.33 (stored 14 values)
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 156.67 (stored 15 values)
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 147.50 (stored 16 values)
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 158.33 (stored 17 values)
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 160.00 (stored 18 values)
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 140.00 (stored 19 values)
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 158.33 (stored 20 values)
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 157.50 (stored 21 values)
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 158.33 (stored 22 values)
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 155.00 (stored 23 values)
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 155.00 (stored 24 values)
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 156.67 (stored 25 values)
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 158.33 (stored 26 values)
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 143.33 (stored 27 values)
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 139.17 (stored 28 values)
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 158.33 (stored 29 values)
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 142.50 (stored 30 values)
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 143.33 (stored 31 values)
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 138.33 (stored 32 values)
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 141.67 (stored 33 values)
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 155.83 (stored 34 values)
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 148.33 (stored 35 values)
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 144.17 (stored 36 values)
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 158.33 (stored 37 values)
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 155.00 (stored 38 values)
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 155.00 (stored 39 values)
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 131.67 (stored 40 values)
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 158.33 (stored 41 values)
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 158.33 (stored 42 values)
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 150.00 (stored 43 values)
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 145.83 (stored 44 values)
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 155.00 (stored 45 values)
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 155.00 (stored 46 values)
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 155.00 (stored 47 values)
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 155.83 (stored 48 values)
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 148.33 (stored 49 values)
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 156.67 (stored 50 values)
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 150.00 (stored 51 values)
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 157.50 (stored 52 values)
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 155.00 (stored 53 values)
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 155.00 (stored 54 values)
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 154.17 (stored 55 values)
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 154.17 (stored 56 values)
+kadai2c_kafak_processor  | 🚨 [CO2 Threshold] Status changed: 1499.00 ppm -> above (sent: yes)
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 152.50 (stored 57 values)
+kadai2c_kafak_processor  | 📊 [Rolling Average] Published: 152.69 (from 57 samples)
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 155.83 (stored 58 values)
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 155.83 (stored 59 values)
+kadai2c_kafak_processor  | 📊 [Rolling Average] Published: 152.80 (from 59 samples)
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 155.83 (stored 60 values)
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 155.83 (stored 61 values)
+kadai2c_kafak_processor  | 📊 [Rolling Average] Published: 152.90 (from 61 samples)
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 155.83 (stored 62 values)
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 155.83 (stored 63 values)
+kadai2c_kafak_processor  | 📊 [Rolling Average] Published: 152.99 (from 63 samples)
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 155.83 (stored 64 values)
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 155.83 (stored 65 values)
+kadai2c_kafak_processor  | 📊 [Rolling Average] Published: 153.08 (from 65 samples)
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 155.83 (stored 66 values)
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 155.83 (stored 67 values)
+kadai2c_kafak_processor  | 📊 [Rolling Average] Published: 153.16 (from 67 samples)
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 155.83 (stored 68 values)
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 155.83 (stored 69 values)
+kadai2c_kafak_processor  | 📊 [Rolling Average] Published: 153.24 (from 69 samples)
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 155.83 (stored 70 values)
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 155.83 (stored 71 values)
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | 📊 [Rolling Average] Published: 153.31 (from 71 samples)
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 155.83 (stored 72 values)
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 155.83 (stored 73 values)
+kadai2c_kafak_processor  | 📊 [Rolling Average] Published: 153.38 (from 73 samples)
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 155.83 (stored 74 values)
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 155.83 (stored 75 values)
+kadai2c_kafak_processor  | 📊 [Rolling Average] Published: 153.44 (from 75 samples)
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 155.83 (stored 20 values)
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 155.83 (stored 20 values)
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | 📊 [Rolling Average] Published: 155.83 (from 20 samples)
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 155.83 (stored 20 values)
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 155.83 (stored 20 values)
+kadai2c_kafak_processor  | 📊 [Rolling Average] Published: 155.83 (from 20 samples)
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 155.83 (stored 20 values)
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 155.83 (stored 20 values)
+kadai2c_kafak_processor  | 📊 [Rolling Average] Published: 155.83 (from 20 samples)
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 155.83 (stored 20 values)
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 155.83 (stored 20 values)
+kadai2c_kafak_processor  | 📊 [Rolling Average] Published: 155.83 (from 20 samples)
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 155.83 (stored 20 values)
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 155.83 (stored 20 values)
+kadai2c_kafak_processor  | 📊 [Rolling Average] Published: 155.83 (from 20 samples)
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 155.83 (stored 20 values)
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 155.83 (stored 20 values)
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | 📊 [Rolling Average] Published: 155.83 (from 20 samples)
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 155.83 (stored 20 values)
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 155.83 (stored 20 values)
+kadai2c_kafak_processor  | 📊 [Rolling Average] Published: 155.83 (from 20 samples)
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 155.83 (stored 20 values)
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 155.83 (stored 20 values)
+kadai2c_kafak_processor  | 📊 [Rolling Average] Published: 155.83 (from 20 samples)
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 155.83 (stored 20 values)
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 155.83 (stored 20 values)
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | 📊 [Rolling Average] Published: 155.83 (from 20 samples)
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 155.83 (stored 20 values)
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 155.83 (stored 20 values)
+kadai2c_kafak_processor  | 📊 [Rolling Average] Published: 155.83 (from 20 samples)
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 155.83 (stored 20 values)
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 155.83 (stored 20 values)
+kadai2c_kafak_processor  | 📊 [Rolling Average] Published: 155.83 (from 20 samples)
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 155.83 (stored 20 values)
+kadai2c_kafak_processor  | ✅ [CO2] Received: 1499.00 ppm
+kadai2c_kafak_processor  | ✅ [Illumination] Received: 145.83 (stored 20 values)
