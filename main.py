@@ -1,6 +1,7 @@
 """I483 - Kadai1 - XU Pengfei(2510082)
 Multi-sensor Data Acquisition System
 """
+import _thread
 import time
 from machine import I2C, Pin
 from umqtt.robust import MQTTClient
@@ -202,6 +203,38 @@ class SensorManager:
             pub("DPS310/temperature", data['temperature'])
             pub("DPS310/air_pressure", data['pressure'])
             pub("DPS310/altitude", data['altitude'])
+        pub("timestamp", current_time())
+
+
+led = Pin(2, Pin.OUT)
+led_should_blink = False
+
+
+def mqtt_callback(topic, msg):
+    global led_should_blink
+    topic = topic.decode() if isinstance(topic, bytes) else topic
+    msg = msg.decode() if isinstance(msg, bytes) else msg
+
+    print(f"[MQTT] Received topic: {topic}, msg: {msg}")
+    if topic.endswith("/co2_threshold-crossed"):
+        if msg == "yes":
+            led_should_blink = True
+        else:
+            led_should_blink = False
+            led.value(0)
+
+
+def led_blink_loop():
+    global led_should_blink
+    while True:
+        if led_should_blink:
+            led.value(1)
+            time.sleep(0.25)
+            led.value(0)
+            time.sleep(0.25)
+        else:
+            led.value(0)
+            time.sleep(0.2)
 
 
 def connect_mqtt() -> MQTTClient:
@@ -209,9 +242,9 @@ def connect_mqtt() -> MQTTClient:
     client = MQTTClient(client_id="test", server="150.65.230.59")
     res = client.connect()
     print(f"MQTT connection result: {res}")
-    # client.set_callback(mqtt_callback)
-    # res = client.subscribe("i483/mp/callme")
-    # print(f"MQTT subscribe result: {res}")
+    client.set_callback(mqtt_callback)
+    res = client.subscribe("i483/actuators/s2510082/co2_threshold-crossed")
+    print(f"MQTT subscribe result: {res}")
     return client
 
 
@@ -232,7 +265,8 @@ def main():
 
     print("\nStarting to read sensor data...")
     print("Press Ctrl+C to stop the program")
-
+    # TODO use asyncio for better performance
+    _thread.start_new_thread(led_blink_loop, ())
     try:
         time.sleep(1)
         while True:
@@ -243,6 +277,7 @@ def main():
             sensor_manager.display_sensor_data()
 
             sensor_manager.mqtt_publish(mqtt_client, student_id="s2510082")
+            mqtt_client.check_msg()
             time.sleep(15)
     except KeyboardInterrupt:
         print("\nProgram stopped")
