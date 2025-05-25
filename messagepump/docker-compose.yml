@@ -1,0 +1,15 @@
+version: "3.9"
+
+services:
+  messagepump:
+    build: .
+    container_name: messagepump
+    environment:
+      TZ: Asia/Tokyo
+      # MAVEN_OPTS: "-Xms256m -Xmx512m"
+    volumes:
+      - ./config.properties:/app/config.properties
+      # - ./logs:/app/logs
+    # ports:
+    #   - "8080:8080"
+    restart: unless-stopped

@@ -1,0 +1,22 @@
+# Copy the contents of this file to a file named "config.properties"
+## MessagePump specific configuration
+kafka.topic.separator = -
+kafka.deadchannel = project-dead-messages
+
+mqtt.server = tcp://localhost
+mqtt.topics.subscribe = prj1/sensors/#
+
+## Kafka client specific configuration, add properties below as needed
+# Kafka server to connect to
+bootstrap.servers = 150.65.230.59:9092
+
+# refresh metadata every 5s, so we can pick up on newly created topics
+metadata.max.age.ms = 5000
+
+## The defaults set in the app, configure them as needed
+#linger.ms" = 10
+#delivery.timeout.ms = 1000
+#request.timeout.ms = 500
+#partitioner.ignore.keys = true
+#key.serializer = org.apache.kafka.common.serialization.StringSerializer
+#value.serializer = org.apache.kafka.common.serialization.StringSerializer
