@@ -11,7 +11,7 @@ if [ ! -f "/app/config.properties" ]; then\n\
   echo "Warning: config.properties not found, copying default configuration"\n\
   cp /app/config.properties.default /app/config.properties\n\
 fi\n\
-exec mvn -B compile exec:java -Dexec.mainClass=jaist.messagepump.App' > /app/docker-entrypoint.sh \
+exec mvn -B compile exec:java -Dexec.mainClass=jaist.messagepump.AppKt' > /app/docker-entrypoint.sh \
     && chmod +x /app/docker-entrypoint.sh
 
 ENTRYPOINT ["/app/docker-entrypoint.sh"]
