@@ -2,7 +2,6 @@
 Multi-sensor Data Acquisition System - Async Implementation
 """
 import asyncio
-import time
 
 from machine import I2C, Pin
 from umqtt.robust import MQTTClient
@@ -82,20 +81,18 @@ class AsyncSensorManager:
         """Set MQTT client"""
         self.mqtt_client = client
 
-    def sensor_reader(self):
-        """Sensor reading task"""
-        while True:
-            self.read_all_sensors()
-            self.display_sensor_data()
-            self.mqtt_publish(student_id="s2510082")
-            time.sleep(15)
-
     async def sensor_reader_async(self):
         """Async sensor reading task"""
+        task_id = id(asyncio.current_task())  # 获取当前任务的唯一ID
+        print(f"[DEBUG] sensor_reader_async started, task_id: {task_id}")
+
         while True:
+            print(f"[DEBUG] Task {task_id} - Starting sensor read cycle")
             self.read_all_sensors()
+            await asyncio.sleep(1)
             self.display_sensor_data()
             self.mqtt_publish(student_id="s2510082")
+            print(f"[DEBUG] Task {task_id} - Cycle complete, sleeping for 15s")
             await asyncio.sleep(15)
 
     async def mqtt_poller(self):
