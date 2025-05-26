@@ -5,6 +5,7 @@ import time
 from micropython import const
 
 from i2c_helpers import RegisterStruct
+from sensor import Sensor
 
 # RPR-0521RS Device Address
 RPR0521RS_DEVICE_ADDRESS = const(0x38)  # 7bit Address
@@ -59,7 +60,7 @@ ALS_GAIN_TABLE = [1, 2, 64, 128]
 ALS_MEASUREMENT_TIME_TABLE = [0, 0, 0, 0, 0, 100, 100, 100, 100, 100, 400, 400, 50, 0, 0, 0]
 
 
-class RPR0521RS:
+class RPR0521RS(Sensor):
     # Register definitions
     _system_control = RegisterStruct(RPR0521RS_SYSTEM_CONTROL, ">B")
     _mode_control = RegisterStruct(RPR0521RS_MODE_CONTROL, ">B")
@@ -69,6 +70,7 @@ class RPR0521RS:
 
     def __init__(self, i2c, address=RPR0521RS_DEVICE_ADDRESS):
         """Initialize the RPR-0521RS sensor."""
+        super().__init__(i2c, "RPR0521RS", address=address)
         self.i2c = i2c
         self.address = address
 
@@ -86,6 +88,46 @@ class RPR0521RS:
 
         # Initialize device
         self._init_sensor()
+        
+    def start(self):
+        """Initialize the sensor (already done in __init__)"""
+        # Initialization already done in __init__
+        return True
+        
+    def read(self):
+        """Read sensor data and return as dictionary"""
+        self.data = {
+            'ambient_light': self.ambient_light,
+            'proximity': self.proximity,
+            'illumination': self.illumination,
+            'infrared_illumination': self.infrared_illumination,
+        }
+        return self.data
+    
+    @staticmethod
+    def display(data):
+        """Format sensor data for display
+        
+        Parameters:
+            data: Dictionary containing sensor readings
+            
+        Returns:
+            Formatted string for display
+        """
+        if not data:
+            return "RPR0521RS Ambient Light/Proximity Sensor: No data available"
+            
+        result = "RPR0521RS Ambient Light/Proximity Sensor:\n"
+        if 'ambient_light' in data:
+            result += f"  Ambient Light: {data['ambient_light']:.2f} lx\n"
+        if 'proximity' in data:
+            result += f"  Proximity: {data['proximity']}\n"
+        if 'illumination' in data:
+            result += f"  Illumination: {data['illumination']:.2f} lx\n"
+        if 'infrared_illumination' in data:
+            result += f"  Infrared Illumination: {data['infrared_illumination']:.2f} lx"
+            
+        return result
 
     def _init_sensor(self):
         """Initialize the sensor with default settings."""

@@ -210,6 +210,43 @@ class DPS310(Sensor):
         self._wait_temperature_ready()
         self._wait_pressure_ready()
 
+    def start(self):
+        """Initialize the sensor (already done in __init__)"""
+        # Initialization already done in __init__
+        return True
+        
+    def read(self):
+        """Read sensor data and return as dictionary"""
+        self.data = {
+            'temperature': self.temperature,
+            'air_pressure': self.pressure,
+            'altitude': self.altitude
+        }
+        return self.data
+    
+    @staticmethod
+    def display(data):
+        """Format sensor data for display
+        
+        Parameters:
+            data: Dictionary containing sensor readings
+            
+        Returns:
+            Formatted string for display
+        """
+        if not data:
+            return "DPS310 Pressure/Temperature Sensor: No data available"
+            
+        result = "DPS310 Pressure/Temperature Sensor:\n"
+        if 'temperature' in data:
+            result += f"  Temperature: {data['temperature']:.2f} °C\n"
+        if 'pressure' in data:
+            result += f"  Pressure: {data['air_pressure']:.2f} hPa\n"
+        if 'altitude' in data:
+            result += f"  Altitude: {data['altitude']:.2f} m"
+            
+        return result
+
     @property
     def pressure_oversample(self) -> str:
         """

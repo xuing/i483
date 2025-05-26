@@ -17,7 +17,7 @@ WIFI_NETWORKS = [
 MAX_CONNECTION_ATTEMPTS = 3  # Try each network this many times before moving to next one
 
 # NTP server configuration
-NTP_SERVER = "ntp.nict.jp"  # Japan standard time server, can be changed as needed
+NTP_SERVER = "ntp.jaist.ac.jp"  # Japan standard time server, can be changed as needed
 
 rtc = RTC()
 

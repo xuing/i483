@@ -31,22 +31,46 @@ class BH1750(Sensor):
         self._mode = mode
         self._measurement_accuracy = 1.0  # Default factor is 1.0, can be adjusted according to actual calibration if needed
 
+    def start(self):
+        """Initialize the BH1750 sensor"""
+        self.power(True)
+        self.reset()
+        self.set_mode(self._mode)
+        return True
+
+    def read(self):
+        """Read sensor data and return as dictionary"""
+        lux = self.read_light()
+        if lux >= 0:
+            self.data = {'illuminance': lux}
+        return self.data
+        
+    @staticmethod
+    def display(data):
+        """Format sensor data for display
+        
+        Parameters:
+            data: Dictionary containing sensor readings
+            
+        Returns:
+            Formatted string for display
+        """
+        if not data:
+            return "BH1750 Light Sensor: No data available"
+            
+        result = "BH1750 Light Sensor:\n"
+        if 'illuminance' in data:
+            result += f"  Illuminance: {data['illuminance']:.2f} lx"
+            
+        return result
+        
+    # 保留原有方法以兼容
     def initialize(self):
         """Initialize the BH1750 sensor
         
         Implementation of abstract method from Sensor base class
         """
-        try:
-            self.power(True)
-            self.reset()
-            self.set_mode(self._mode)
-            return True
-        except Exception as e:
-            print(f"[ERROR] {self.name} initialization failed: {e}")
-            return False
-
-    def start(self):
-        pass
+        return self.init()
 
     def stop(self):
         self.power_down()

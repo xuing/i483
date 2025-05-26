@@ -54,6 +54,50 @@ class SCD41(Sensor):
         super().__init__(i2c, "SCD41", address=address)
         self.i2c = i2c
         self.address = address
+        
+    def start(self):
+        """Initialize the sensor for measurements"""
+        self.stop_periodic_measurement()
+        self.reinit()
+        self.start_periodic_measurement()
+        return True
+        
+    def read(self):
+        """Read sensor data and return as dictionary"""
+        error, data_ready = self.get_data_ready_status()
+        
+        if error == NO_ERROR and data_ready:
+            error, co2, temperature, humidity = self.read_measurement()
+            if error == NO_ERROR:
+                self.data = {
+                    'co2': co2,
+                    'temperature': temperature,
+                    'humidity': humidity
+                }
+        return self.data
+    
+    @staticmethod
+    def display(data):
+        """Format sensor data for display
+        
+        Parameters:
+            data: Dictionary containing sensor readings
+            
+        Returns:
+            Formatted string for display
+        """
+        if not data:
+            return "SCD41 CO2 Sensor: No data available"
+            
+        result = "SCD41 CO2 Sensor:\n"
+        if 'co2' in data:
+            result += f"  CO2: {data['co2']} ppm\n"
+        if 'temperature' in data:
+            result += f"  Temperature: {data['temperature']:.2f} °C\n"
+        if 'humidity' in data:
+            result += f"  Humidity: {data['humidity']:.2f} %"
+            
+        return result
 
     def _calculate_crc(self, data):
         """

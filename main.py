@@ -1,31 +1,37 @@
 """I483 - Kadai1 - XU Pengfei(2510082)
-Multi-sensor Data Acquisition System
+Multi-sensor Data Acquisition System - Async Implementation
 """
-import _thread
+import asyncio
 import time
+
 from machine import I2C, Pin
 from umqtt.robust import MQTTClient
 
+from bh1750 import BH1750
+from dps310 import DPS310
+from rpr0521rs import RPR0521RS
+# Import sensor modules
+from scd41 import SCD41
+from sensor import Sensor
 # Import utility modules
 from utils import show_mac_address, connect_wifi, sync_rtc, current_time
 
-# Import sensor modules
-from scd41 import SCD41, NO_ERROR
-from bh1750 import BH1750, CONT_H_RES_MODE
-from rpr0521rs import RPR0521RS
-from dps310 import DPS310
 
-
-class SensorManager:
-    """Sensor Manager - Unified management of all sensors"""
+class AsyncSensorManager:
+    """Async Sensor Manager - Unified management of all sensors"""
 
     def __init__(self):
         # Initialize I2C bus
         self.i2c = I2C(0, scl=Pin(22), sda=Pin(21), freq=100000)
 
-        # Sensor instance dictionary
-        self.sensors = {}
-        self.sensor_data = {}
+        self.scd41: Sensor = SCD41(self.i2c)
+        self.bh1750: Sensor = BH1750(self.i2c)
+        self.rpr0521rs: Sensor = RPR0521RS(self.i2c)
+        self.dps310: Sensor = DPS310(self.i2c)
+        self.sensors = [self.scd41, self.bh1750, self.rpr0521rs, self.dps310]
+
+        # MQTT client
+        self.mqtt_client = setup_mqtt()
 
         # Initialize all sensors
         self._init_sensors()
@@ -33,213 +39,93 @@ class SensorManager:
     def _init_sensors(self):
         """Initialize all sensors"""
         print("\n=== Initializing Sensors ===")
-
-        # Initialize SCD41 CO2 sensor
-        try:
-            scd41 = SCD41(self.i2c)
-            # Stop any previous measurements
-            scd41.stop_periodic_measurement()
-            # Reinitialize
-            scd41.reinit()
-            # Start periodic measurement
-            scd41.start_periodic_measurement()
-            self.sensors['scd41'] = scd41
-            print("[OK] SCD41 CO2 sensor initialized successfully")
-        except Exception as e:
-            print(f"[ERROR] SCD41 initialization failed: {e}")
-
-        # Initialize BH1750 light sensor
-        try:
-            bh1750 = BH1750(self.i2c, mode=CONT_H_RES_MODE)
-            bh1750.power(True)
-            bh1750.reset()
-            bh1750.set_mode()
-            self.sensors['bh1750'] = bh1750
-            print("[OK] BH1750 light sensor initialized successfully")
-        except Exception as e:
-            print(f"[ERROR] BH1750 initialization failed: {e}")
-
-        # Initialize RPR0521RS ambient light/proximity sensor
-        try:
-            rpr0521rs = RPR0521RS(self.i2c)
-            self.sensors['rpr0521rs'] = rpr0521rs
-            print("[OK] RPR0521RS ambient light/proximity sensor initialized successfully")
-        except Exception as e:
-            print(f"[ERROR] RPR0521RS initialization failed: {e}")
-
-        # Initialize DPS310 pressure/temperature sensor
-        try:
-            dps310 = DPS310(self.i2c)
-            self.sensors['dps310'] = dps310
-            print("[OK] DPS310 pressure/temperature sensor initialized successfully")
-        except Exception as e:
-            print(f"[ERROR] DPS310 initialization failed: {e}")
+        for sensor in self.sensors:
+            sensor.start()
+            print(f"[INFO] {sensor.name} initialized successfully")
+        print("\n=== All Sensors Initialized ===")
 
     def read_all_sensors(self):
         """Read data from all sensors"""
-        timestamp = time.time()
-
-        # Read SCD41 data
-        if 'scd41' in self.sensors:
-            scd41 = self.sensors['scd41']
-            error, data_ready = scd41.get_data_ready_status()
-
-            if error == NO_ERROR and data_ready:
-                error, co2, temperature, humidity = scd41.read_measurement()
-                if error == NO_ERROR:
-                    self.sensor_data['scd41'] = {
-                        'co2': co2,
-                        'temperature': temperature,
-                        'humidity': humidity,
-                        'timestamp': timestamp
-                    }
-
-        # Read BH1750 data
-        if 'bh1750' in self.sensors:
-            bh1750 = self.sensors['bh1750']
-            lux = bh1750.read_light()
-            if lux >= 0:
-                self.sensor_data['bh1750'] = {
-                    'illuminance': lux,
-                    'timestamp': timestamp
-                }
-
-        # Read RPR0521RS data
-        if 'rpr0521rs' in self.sensors:
-            rpr0521rs = self.sensors['rpr0521rs']
+        for sensor in self.sensors:
             try:
-                ambient_light = rpr0521rs.ambient_light
-                proximity = rpr0521rs.proximity
-                self.sensor_data['rpr0521rs'] = {
-                    'ambient_light': ambient_light,
-                    'proximity': proximity,
-                    'illumination': rpr0521rs.illumination,
-                    'infrared_illumination': rpr0521rs.infrared_illumination,
-                    'timestamp': timestamp
-                }
+                # Read data from each sensor
+                sensor.read()
             except Exception as e:
-                print(f"[ERROR] Failed to read RPR0521RS data: {e}")
-
-        # Read DPS310 data
-        if 'dps310' in self.sensors:
-            dps310 = self.sensors['dps310']
-            try:
-                temperature = dps310.temperature
-                pressure = dps310.pressure
-                altitude = dps310.altitude
-                self.sensor_data['dps310'] = {
-                    'temperature': temperature,
-                    'pressure': pressure,
-                    'altitude': altitude,
-                    'timestamp': timestamp
-                }
-            except Exception as e:
-                print(f"[ERROR] Failed to read DPS310 data: {e}")
-
-        return self.sensor_data
+                print(f"[ERROR] Failed to read {sensor.name}: {e}")
 
     def display_sensor_data(self):
         """Display all sensor data"""
         print(f"\n=== Sensor Data [{current_time()}] ===")
 
-        # Display SCD41 data
-        if 'scd41' in self.sensor_data:
-            data = self.sensor_data['scd41']
-            print("SCD41 CO2 Sensor:")
-            print(f"  CO2: {data['co2']} ppm")
-            print(f"  Temperature: {data['temperature']:.2f} °C")
-            print(f"  Humidity: {data['humidity']:.2f} %")
+        for sensor in self.sensors:
+            display_str = sensor.__class__.display(sensor.data)
+            print(display_str)
 
-        # Display BH1750 data
-        if 'bh1750' in self.sensor_data:
-            data = self.sensor_data['bh1750']
-            print("BH1750 Light Sensor:")
-            print(f"  Illuminance: {data['illuminance']:.2f} lx")
-
-        # Display RPR0521RS data
-        if 'rpr0521rs' in self.sensor_data:
-            data = self.sensor_data['rpr0521rs']
-            print("RPR0521RS Ambient Light/Proximity Sensor:")
-            print(f"  Ambient Light: {data['ambient_light']:.2f} lx")
-            print(f"  Proximity: {data['proximity']}")
-            print(f"  Illumination: {data['illumination']:.2f} lx")
-            print(f"  Infrared Illumination: {data['infrared_illumination']:.2f} lx")
-
-        # Display DPS310 data
-        if 'dps310' in self.sensor_data:
-            data = self.sensor_data['dps310']
-            print("DPS310 Pressure/Temperature Sensor:")
-            print(f"  Temperature: {data['temperature']:.2f} °C")
-            print(f"  Pressure: {data['pressure']:.2f} hPa")
-            print(f"  Altitude: {data['altitude']:.2f} m")
-
-    def mqtt_publish(self, client: MQTTClient, student_id="s2510082"):
+    def mqtt_publish(self, student_id="s2510082"):
         """Publish sensor data to MQTT broker"""
+        if not self.mqtt_client:
+            return
+
         topic_base = f"i483/sensors/{student_id}/"
 
-        def pub(topic, value):
-            full_topic = topic_base + topic
-            client.publish(full_topic, f"{value:.2f}" if isinstance(value, float) else str(value))
+        for sensor in self.sensors:
+            for key, value in sensor.data.items():
+                topic_suffix = f"{sensor.name}/{key}"
+                if isinstance(value, (int, float, str)):
+                    # Only publish valid data types
+                    full_topic = topic_base + topic_suffix
+                    formatted_value = f"{value:.2f}" if isinstance(value, float) else str(value)
+                    print(f"[MQTT] Publishing {full_topic}: {formatted_value}")
+                    self.mqtt_client.publish(full_topic, formatted_value)
 
-        if 'scd41' in self.sensor_data:
-            data = self.sensor_data['scd41']
-            pub("SCD41/co2", data['co2'])
-            pub("SCD41/temperature", data['temperature'])
-            pub("SCD41/humidity", data['humidity'])
+    def set_mqtt_client(self, client):
+        """Set MQTT client"""
+        self.mqtt_client = client
 
-        if 'bh1750' in self.sensor_data:
-            data = self.sensor_data['bh1750']
-            pub("BH1750/illumination", data['illuminance'])
+    def sensor_reader(self):
+        """Sensor reading task"""
+        while True:
+            self.read_all_sensors()
+            self.display_sensor_data()
+            self.mqtt_publish(student_id="s2510082")
+            time.sleep(15)
 
-        if 'rpr0521rs' in self.sensor_data:
-            data = self.sensor_data['rpr0521rs']
-            pub("RPR0521RS/ambient_light", data['ambient_light'])
-            pub("RPR0521RS/proximity", data['proximity'])
-            pub("RPR0521RS/illumination", data['illumination'])
-            pub("RPR0521RS/infrared_illumination", data['infrared_illumination'])
+    async def sensor_reader_async(self):
+        """Async sensor reading task"""
+        while True:
+            self.read_all_sensors()
+            self.display_sensor_data()
+            self.mqtt_publish(student_id="s2510082")
+            await asyncio.sleep(15)
 
-        if 'dps310' in self.sensor_data:
-            data = self.sensor_data['dps310']
-            pub("DPS310/temperature", data['temperature'])
-            pub("DPS310/air_pressure", data['pressure'])
-            pub("DPS310/altitude", data['altitude'])
-        pub("timestamp", current_time())
+    async def mqtt_poller(self):
+        """Async MQTT message polling task"""
+        while True:
+            self.mqtt_client.check_msg()
+            await asyncio.sleep(1)
 
 
+# Global variables for LED control
 led = Pin(2, Pin.OUT)
 led_should_blink = False
 
 
 def mqtt_callback(topic, msg):
+    """MQTT message callback"""
     global led_should_blink
     topic = topic.decode() if isinstance(topic, bytes) else topic
     msg = msg.decode() if isinstance(msg, bytes) else msg
 
     print(f"[MQTT] Received topic: {topic}, msg: {msg}")
     if topic.endswith("/co2_threshold-crossed"):
-        if msg == "yes":
-            led_should_blink = True
-        else:
-            led_should_blink = False
+        led_should_blink = (msg == "yes")
+        if not led_should_blink:
             led.value(0)
 
 
-def led_blink_loop():
-    global led_should_blink
-    while True:
-        if led_should_blink:
-            led.value(1)
-            time.sleep(0.25)
-            led.value(0)
-            time.sleep(0.25)
-        else:
-            led.value(0)
-            time.sleep(0.2)
-
-
-def connect_mqtt() -> MQTTClient:
-    """Connect to MQTT broker"""
-    client = MQTTClient(client_id="test", server="150.65.230.59")
+def setup_mqtt() -> MQTTClient:
+    """Setup MQTT connection"""
+    client = MQTTClient(client_id="s2510082", server="150.65.230.59")
     res = client.connect()
     print(f"MQTT connection result: {res}")
     client.set_callback(mqtt_callback)
@@ -248,10 +134,24 @@ def connect_mqtt() -> MQTTClient:
     return client
 
 
+async def led_controller():
+    """Async LED controller task"""
+    global led_should_blink
+    while True:
+        if led_should_blink:
+            led.value(1)
+            await asyncio.sleep(0.25)
+            led.value(0)
+            await asyncio.sleep(0.25)
+        else:
+            led.value(0)
+            await asyncio.sleep(0.2)
+
+
 def main():
     """Main function"""
     print("\n=== I483 - Kadai1 - XU Pengfei(2510082) ===")
-    print("Multi-sensor Data Acquisition System")
+    print("Multi-sensor Data Acquisition System - Async Implementation")
 
     show_mac_address()
 
@@ -260,29 +160,26 @@ def main():
     else:
         print("WiFi connection failed, unable to synchronize RTC time")
 
-    sensor_manager = SensorManager()
-    mqtt_client = connect_mqtt()
+    # Initialize sensor manager and MQTT client
+    sensor_manager = AsyncSensorManager()
 
-    print("\nStarting to read sensor data...")
+    print("\nStarting async sensor data acquisition...")
     print("Press Ctrl+C to stop the program")
-    # TODO use asyncio for better performance
-    _thread.start_new_thread(led_blink_loop, ())
+
     try:
-        time.sleep(1)
-        while True:
-            # Read all sensor data
-            sensor_manager.read_all_sensors()
-
-            # Display sensor data
-            sensor_manager.display_sensor_data()
-
-            sensor_manager.mqtt_publish(mqtt_client, student_id="s2510082")
-            mqtt_client.check_msg()
-            time.sleep(15)
+        # sensor_manager.sensor_reader()
+        asyncio.run(asyncio.gather(
+            sensor_manager.sensor_reader_async(),
+            sensor_manager.mqtt_poller(),
+            led_controller()
+        ))
+    except Exception as e:
+        print("sensor_reader error:", e)
     except KeyboardInterrupt:
         print("\nProgram stopped")
     finally:
         print("Cleaning up resources...")
+        led.value(0)
 
 
 if __name__ == "__main__":
