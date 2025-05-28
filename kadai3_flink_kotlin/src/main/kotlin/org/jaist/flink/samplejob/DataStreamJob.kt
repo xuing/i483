@@ -18,7 +18,6 @@
 package org.jaist.flink.samplejob
 
 import org.apache.flink.api.common.eventtime.WatermarkStrategy
-import org.apache.flink.api.common.serialization.SimpleStringSchema
 import org.apache.flink.connector.kafka.source.KafkaSource
 import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer
 import org.apache.flink.streaming.api.datastream.DataStream
@@ -74,7 +73,7 @@ class SensorDataProcessor(private val env: StreamExecutionEnvironment) {
         
         // Configuration constants
         private const val KAFKA_BOOTSTRAP_SERVERS = "150.65.230.59:9092"
-        private const val TOPIC_PATTERN = "i483-sensors-[a-zA-Z0-9]+-[a-zA-Z0-9]+-[a-z_]+"
+        private const val TOPIC_PATTERN = "i483-sensors-s2510082-[a-zA-Z0-9]+-[a-z_]+"
         private const val METADATA_MAX_AGE_MS = "5000"
         private const val JOB_NAME = "Sensor Data Processing Job"
     }
@@ -91,7 +90,7 @@ class SensorDataProcessor(private val env: StreamExecutionEnvironment) {
             WatermarkStrategy.noWatermarks(), 
             "sensor-data-source"
         )
-        
+
         // 3. Process the sensor data
         processSensorData(sensorDataStream)
         
@@ -111,23 +110,9 @@ class SensorDataProcessor(private val env: StreamExecutionEnvironment) {
             .setProperty("enable.auto.commit", "false")
             .build()
     }
-    
-    private fun processSensorData(dataStream: org.apache.flink.streaming.api.datastream.DataStream<String>) {
-        dataStream
-            // Add timestamp for debugging
-            .map { data -> 
-                val timestamp = System.currentTimeMillis()
-                "[$timestamp] $data"
-            }
-            .name("add-processing-timestamp")
-            // Filter out empty or invalid data
-            .filter { data -> 
-                data.isNotBlank() && data.contains(",")
-            }
-            .name("filter-valid-data")
-            // Print the processed data
-            .print("Processed Sensor Data")
-            
-        logger.info("Sensor data processing pipeline configured")
+
+    private fun processSensorData(dataStream: DataStream<String>) {
+        // 假设 dataStream 是每行 "topic,timestamp,value"
+
     }
 }

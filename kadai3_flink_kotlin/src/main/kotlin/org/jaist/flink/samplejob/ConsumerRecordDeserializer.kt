@@ -21,11 +21,8 @@ class ConsumerRecordDeserializer : KafkaRecordDeserializationSchema<String> {
     override fun deserialize(record: ConsumerRecord<ByteArray, ByteArray>, out: Collector<String>) {
         try {
             val value = record.value()?.let { String(it, Charsets.UTF_8) } ?: "null"
-            val structuredData = "${record.topic()},${record.timestamp()},${record.partition()},${record.offset()},$value"
-            
-            logger.debug("Processed record from topic: {}, partition: {}, offset: {}", 
-                record.topic(), record.partition(), record.offset())
-            
+            val structuredData = "${record.topic()},${record.timestamp()},$value"
+
             out.collect(structuredData)
         } catch (e: Exception) {
             logger.error("Error deserializing record from topic: {}, partition: {}, offset: {}, error: {}", 
