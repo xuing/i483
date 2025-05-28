@@ -3,3 +3,5 @@
 /tests/scd4x_test_sw_i2c
 .idea
 /messagepump/target
+go.sum
+*.iml
