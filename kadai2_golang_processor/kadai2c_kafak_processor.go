@@ -278,7 +278,7 @@ func startReader(topic string) {
 	r := kafka.NewReader(kafka.ReaderConfig{
 		Brokers:     []string{KafkaBroker},
 		Topic:       topic,
-		GroupID:     topic + "-general",
+		GroupID:     topic + "-golang-general",
 		StartOffset: kafka.LastOffset,
 		MinBytes:    1,
 		MaxBytes:    10e6,
@@ -330,16 +330,11 @@ func main() {
 	// Start rolling average processor
 	go rollingAverageProcessor()
 
-	//// Start general readers for other sensors
-	//for _, s := range sensors {
-	//	// Skip sensors with dedicated processors
-	//	if s == "BH1750/illumination" || s == "SCD41/co2" {
-	//		continue
-	//	}
-	//
-	//	topic := makeTopic(s)
-	//	go startReader(topic)
-	//}
+	// Start general readers for other sensors
+	for _, s := range sensors {
+		topic := makeTopic(s)
+		go startReader(topic)
+	}
 
 	fmt.Println("✅ All processors started successfully!")
 	select {} // Block forever
