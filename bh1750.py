@@ -42,7 +42,7 @@ class BH1750(Sensor):
         """Read sensor data and return as dictionary"""
         lux = self.read_light()
         if lux >= 0:
-            self.data = {'illuminance': lux}
+            self.data = {'illumination': lux}
         return self.data
         
     @staticmethod
@@ -59,8 +59,8 @@ class BH1750(Sensor):
             return "BH1750 Light Sensor: No data available"
             
         result = "BH1750 Light Sensor:\n"
-        if 'illuminance' in data:
-            result += f"  Illuminance: {data['illuminance']:.2f} lx"
+        if 'illumination' in data:
+            result += f"  illumination: {data['illumination']:.2f} lx"
             
         return result
         
@@ -158,7 +158,7 @@ def main():
         while True:
             data = sensor.read_data()
             if data:
-                print(f"Illuminance: {data['illumination']:.2f} lx")
+                print(f"illumination: {data['illumination']:.2f} lx")
             else:
                 print("Failed to read sensor data.")
             # Polling interval can be set according to actual needs

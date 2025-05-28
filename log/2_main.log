@@ -38,7 +38,7 @@ Press Ctrl+C to stop the program
 
 === Sensor Data [2000-01-01 00:27:22] ===
 BH1750 Light Sensor:
-  Illuminance: 140.83 lx
+  illumination: 140.83 lx
 RPR0521RS Ambient Light/Proximity Sensor:
   Ambient Light: 126.47 lx
   Proximity: 1
@@ -55,7 +55,7 @@ SCD41 CO2 Sensor:
   Temperature: 27.00 °C
   Humidity: 55.31 %
 BH1750 Light Sensor:
-  Illuminance: 139.17 lx
+  illumination: 139.17 lx
 RPR0521RS Ambient Light/Proximity Sensor:
   Ambient Light: 124.98 lx
   Proximity: 1
@@ -72,7 +72,7 @@ SCD41 CO2 Sensor:
   Temperature: 26.62 °C
   Humidity: 56.39 %
 BH1750 Light Sensor:
-  Illuminance: 138.33 lx
+  illumination: 138.33 lx
 RPR0521RS Ambient Light/Proximity Sensor:
   Ambient Light: 125.18 lx
   Proximity: 1
@@ -89,7 +89,7 @@ SCD41 CO2 Sensor:
   Temperature: 26.37 °C
   Humidity: 57.22 %
 BH1750 Light Sensor:
-  Illuminance: 136.67 lx
+  illumination: 136.67 lx
 RPR0521RS Ambient Light/Proximity Sensor:
   Ambient Light: 123.69 lx
   Proximity: 1
@@ -106,7 +106,7 @@ SCD41 CO2 Sensor:
   Temperature: 26.13 °C
   Humidity: 58.03 %
 BH1750 Light Sensor:
-  Illuminance: 135.00 lx
+  illumination: 135.00 lx
 RPR0521RS Ambient Light/Proximity Sensor:
   Ambient Light: 122.20 lx
   Proximity: 1
@@ -123,7 +123,7 @@ SCD41 CO2 Sensor:
   Temperature: 25.91 °C
   Humidity: 58.75 %
 BH1750 Light Sensor:
-  Illuminance: 133.33 lx
+  illumination: 133.33 lx
 RPR0521RS Ambient Light/Proximity Sensor:
   Ambient Light: 120.72 lx
   Proximity: 1
@@ -140,7 +140,7 @@ SCD41 CO2 Sensor:
   Temperature: 25.68 °C
   Humidity: 59.45 %
 BH1750 Light Sensor:
-  Illuminance: 130.00 lx
+  illumination: 130.00 lx
 RPR0521RS Ambient Light/Proximity Sensor:
   Ambient Light: 120.72 lx
   Proximity: 1
@@ -157,7 +157,7 @@ SCD41 CO2 Sensor:
   Temperature: 25.50 ��C
   Humidity: 60.09 %
 BH1750 Light Sensor:
-  Illuminance: 130.83 lx
+  illumination: 130.83 lx
 RPR0521RS Ambient Light/Proximity Sensor:
   Ambient Light: 119.23 lx
   Proximity: 1
@@ -174,7 +174,7 @@ SCD41 CO2 Sensor:
   Temperature: 25.30 °C
   Humidity: 60.68 %
 BH1750 Light Sensor:
-  Illuminance: 130.00 lx
+  illumination: 130.00 lx
 RPR0521RS Ambient Light/Proximity Sensor:
   Ambient Light: 119.23 lx
   Proximity: 1
