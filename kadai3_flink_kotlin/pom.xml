@@ -69,6 +69,12 @@ under the License.
             <artifactId>flink-clients</artifactId>
             <version>${flink.version}</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.flink/flink-runtime-web -->
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-runtime-web</artifactId>
+            <version>${flink.version}</version>
+        </dependency>
 
         <!-- Kotlin Standard Library -->
         <dependency>
@@ -96,7 +102,12 @@ under the License.
             <artifactId>flink-connector-kafka</artifactId>
             <version>4.0.0-2.0</version>
         </dependency>
-
+        <!-- https://mvnrepository.com/artifact/org.apache.flink/flink-scala -->
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-scala_2.12</artifactId>
+            <version>1.20.1</version>
+        </dependency>
 
         <!-- Add logging framework, to produce console output when running in the IDE. -->
         <!-- These dependencies are excluded from the application JAR by default. -->
@@ -251,7 +262,7 @@ under the License.
                     </execution>
                 </executions>
             </plugin>
-            
+
             <!-- Maven Exec Plugin for running in IDE -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
