@@ -24,7 +24,6 @@ import org.apache.flink.connector.kafka.sink.KafkaRecordSerializationSchema
 import org.apache.flink.connector.kafka.sink.KafkaSink
 import org.apache.flink.connector.kafka.source.KafkaSource
 import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer
-import org.apache.flink.streaming.api.datastream.DataStream
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment
 import org.apache.flink.streaming.api.functions.windowing.ProcessWindowFunction
 import org.apache.flink.streaming.api.windowing.assigners.SlidingEventTimeWindows
@@ -34,31 +33,35 @@ import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.util.regex.Pattern
 
+
+data class SensorKey(var sensorName: String, var dataType: String)
+
 /**
  * 传感器数据类
  */
 data class SensorData(
-    val topic: String,
-    val timestamp: Long,
-    val sensorType: String,
-    val measurementType: String,
-    val value: Double,
-    val studentId: String
+    var sensorName: String,
+    var dataType: String,
+    var topic: String,
+    var timestamp: Long,
+    var value: Double,
+    var studentId: String
 )
+
 
 /**
  * 聚合统计结果类
  */
 data class SensorStats(
-    val sensorType: String,
-    val measurementType: String,
-    val studentId: String,
-    val windowStart: Long,
-    val windowEnd: Long,
-    val minValue: Double,
-    val maxValue: Double,
-    val avgValue: Double,
-    val count: Long
+    var sensorName: String,
+    var dataType: String,
+    var studentId: String,
+    var windowStart: Long,
+    var windowEnd: Long,
+    var minValue: Double,
+    var maxValue: Double,
+    var avgValue: Double,
+    var count: Long
 )
 
 /**
@@ -101,6 +104,8 @@ object SensorAnalyticsJob {
     }
 }
 
+
+
 /**
  * 传感器数据分析处理器
  */
@@ -132,7 +137,7 @@ class SensorAnalyticsProcessor(private val env: StreamExecutionEnvironment) {
             WatermarkStrategy
                 .forBoundedOutOfOrderness<String>(Duration.ofSeconds(10))
                 .withTimestampAssigner { element, _ ->
-                    parseSensorData(element)?.timestamp ?: System.currentTimeMillis()
+                    SensorDataParser.parseSensorData(element)?.timestamp ?: 0L
                 },
             "sensor-data-source"
         )
@@ -142,10 +147,10 @@ class SensorAnalyticsProcessor(private val env: StreamExecutionEnvironment) {
             .map { rawData -> SensorDataParser.parseSensorData(rawData) }
             .filter { it != null }
             .map { it!! }
-        
+
         // 4. 按传感器类型和测量类型分组，应用滑动窗口
         val analyticsStream = sensorDataStream
-            .keyBy { "${it.sensorType}-${it.measurementType}" }
+            .keyBy { SensorKey(it.sensorName, it.dataType) }
             .window(SlidingEventTimeWindows.of(WINDOW_SIZE, SLIDE_SIZE))
             .aggregate(
                 SensorStatsAggregateFunction(),
@@ -158,9 +163,9 @@ class SensorAnalyticsProcessor(private val env: StreamExecutionEnvironment) {
         // 6. 发送结果到Kafka
 //        val kafkaSink = createKafkaSink()
 //        analyticsStream
-//            .map { stats -> formatOutputMessage(stats) }
+//            .map { stats -> SensorDataParser.formatOutputMessage(stats) }
 //            .sinkTo(kafkaSink)
-//
+
         // 7. 执行作业
         logger.info("开始执行 $JOB_NAME")
         env.execute(JOB_NAME)
@@ -184,7 +189,7 @@ class SensorAnalyticsProcessor(private val env: StreamExecutionEnvironment) {
                 KafkaRecordSerializationSchema.builder<String>()
                     .setTopicSelector<String> { record ->
                         // 从记录中提取topic名称
-                        extractTopicFromRecord(record)
+                        SensorDataParser.extractTopicFromRecord(record)
                     }
                     .setValueSerializationSchema(SimpleStringSchema())
                     .build()
@@ -192,70 +197,8 @@ class SensorAnalyticsProcessor(private val env: StreamExecutionEnvironment) {
             .build()
     }
     
-    /**
-     * 解析传感器数据
-     * 输入格式: "topic,timestamp,value"
-     * topic格式: "i483-sensors-s2510082-SensorType-measurement_type"
-     */
-    private fun parseSensorData(rawData: String): SensorData? {
-        try {
-            val parts = rawData.split(",")
-            if (parts.size < 3) return null
-            
-            val topic = parts[0]
-            val timestamp = parts[1].toLongOrNull() ?: System.currentTimeMillis()
-            val value = parts[2].toDoubleOrNull() ?: return null
-            
-            // 解析topic以提取传感器信息
-            // 格式: i483-sensors-s2510082-SensorType-measurement_type
-            val topicParts = topic.split("-")
-            if (topicParts.size < 5) return null
-            
-            val studentId = topicParts[2] // s2510082
-            val sensorType = topicParts[3] // SensorType
-            val measurementType = topicParts[4] // measurement_type
-            
-            return SensorData(
-                topic = topic,
-                timestamp = timestamp,
-                sensorType = sensorType,
-                measurementType = measurementType,
-                value = value,
-                studentId = studentId
-            )
-        } catch (e: Exception) {
-            logger.warn("解析传感器数据失败: $rawData", e)
-            return null
-        }
-    }
-    
-    /**
-     * 从输出记录中提取目标topic名称
-     */
-    private fun extractTopicFromRecord(record: String): String {
-        try {
-            // 记录格式包含传感器类型和测量类型信息
-            val parts = record.split("|")
-            if (parts.size >= 3) {
-                val sensorType = parts[0]
-                val measurementType = parts[1]
-                val statType = parts[2] // min, max, avg
-                return "$OUTPUT_TOPIC_PREFIX-$sensorType-$statType-$measurementType"
-            }
-        } catch (e: Exception) {
-            logger.warn("提取topic名称失败: $record", e)
-        }
-        return "$OUTPUT_TOPIC_PREFIX-unknown"
-    }
-    
-    /**
-     * 格式化输出消息
-     */
-    private fun formatOutputMessage(stats: SensorStats): String {
-        return "${stats.sensorType}|${stats.measurementType}|min|${stats.minValue}\n" +
-               "${stats.sensorType}|${stats.measurementType}|max|${stats.maxValue}\n" +
-               "${stats.sensorType}|${stats.measurementType}|avg|${stats.avgValue}"
-    }
+
+
 }
 
 /**
@@ -290,12 +233,86 @@ class SensorStatsAggregateFunction : AggregateFunction<SensorData, StatsAccumula
 }
 
 /**
+ * 传感器数据解析器
+ */
+object SensorDataParser {
+    private val logger = LoggerFactory.getLogger(SensorDataParser::class.java)
+    
+    /**
+     * 解析传感器数据
+     * 输入格式: "topic,timestamp,value"
+     * topic格式: "i483-sensors-s2510082-SensorName-DataType"
+     */
+    fun parseSensorData(rawData: String): SensorData? {
+        try {
+            val parts = rawData.split(",")
+            if (parts.size < 3) return null
+            
+            val topic = parts[0]
+            // 时间戳必须存在
+            val timestamp = parts[1].toLongOrNull() ?: return null
+            val value = parts[2].toDoubleOrNull() ?: return null
+            
+            // 解析topic以提取传感器信息
+            // 格式: i483-sensors-s2510082-SensorName-DataType
+            val topicParts = topic.split("-")
+            if (topicParts.size < 5) return null
+            
+            val studentId = topicParts[2] // s2510082
+            val sensorType = topicParts[3] // SensorType
+            val dataType = topicParts[4] // DataType
+            
+            return SensorData(
+                topic = topic,
+                timestamp = timestamp,
+                sensorName = sensorType,
+                dataType = dataType,
+                value = value,
+                studentId = studentId
+            )
+        } catch (e: Exception) {
+             logger.warn("解析传感器数据失败: $rawData", e)
+             return null
+         }
+     }
+     
+     /**
+      * 格式化输出消息
+      */
+     fun formatOutputMessage(stats: SensorStats): String {
+         return "${stats.sensorName}|${stats.dataType}|min|${stats.minValue}\n" +
+                "${stats.sensorName}|${stats.dataType}|max|${stats.maxValue}\n" +
+                "${stats.sensorName}|${stats.dataType}|avg|${stats.avgValue}"
+     }
+     
+     /**
+      * 从输出记录中提取目标topic名称
+      */
+     fun extractTopicFromRecord(record: String): String {
+         try {
+             // 记录格式包含传感器类型和测量类型信息
+             val parts = record.split("|")
+             if (parts.size >= 3) {
+                 val sensorType = parts[0]
+                 val measurementType = parts[1]
+                 val statType = parts[2] // min, max, avg
+                 return "i483-sensors-s2510082-analytics-$sensorType-$statType-$measurementType"
+             }
+         } catch (e: Exception) {
+             logger.warn("提取topic名称失败: $record", e)
+         }
+         return "i483-sensors-s2510082-analytics-unknown"
+     }
+ }
+
+/**
  * 传感器统计窗口处理函数
  */
-class SensorStatsProcessWindowFunction : ProcessWindowFunction<StatsAccumulator, SensorStats, String, TimeWindow>() {
-    
+class SensorStatsProcessWindowFunction : ProcessWindowFunction<StatsAccumulator, SensorStats, SensorKey, TimeWindow>() {
+    private val logger = LoggerFactory.getLogger(SensorStatsProcessWindowFunction::class.java)
+
     override fun process(
-        key: String,
+        key: SensorKey,
         context: Context,
         elements: Iterable<StatsAccumulator>,
         out: Collector<SensorStats>
@@ -303,13 +320,15 @@ class SensorStatsProcessWindowFunction : ProcessWindowFunction<StatsAccumulator,
         val accumulator = elements.first()
         
         if (accumulator.count > 0) {
-            val keyParts = key.split("-")
-            val sensorType = keyParts[0]
-            val measurementType = keyParts[1]
-            
+//            15秒一次，5分钟窗口，count应该为20
+            if (accumulator.count != 20L) {
+                logger.warn("窗口处理异常，key: $key, count: ${accumulator.count}, expected: 20")
+            }
+
+
             val stats = SensorStats(
-                sensorType = sensorType,
-                measurementType = measurementType,
+                sensorName = key.sensorName,
+                dataType = key.dataType,
                 studentId = "s2510082",
                 windowStart = context.window().start,
                 windowEnd = context.window().end,
