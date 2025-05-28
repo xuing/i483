@@ -34,18 +34,18 @@ import java.time.Duration
 import java.util.regex.Pattern
 
 
-data class SensorKey(var sensorName: String, var dataType: String)
+data class SensorKey(var sensorName: String = "", var dataType: String= "")
 
 /**
  * 传感器数据类
  */
 data class SensorData(
-    var sensorName: String,
-    var dataType: String,
-    var topic: String,
-    var timestamp: Long,
-    var value: Double,
-    var studentId: String
+    var sensorName: String = "",
+    var dataType: String = "",
+    var topic: String  = "",
+    var timestamp: Long = 0L,
+    var value: Double = 0.0,
+    var studentId: String = ""
 )
 
 
@@ -53,15 +53,15 @@ data class SensorData(
  * 聚合统计结果类
  */
 data class SensorStats(
-    var sensorName: String,
-    var dataType: String,
-    var studentId: String,
-    var windowStart: Long,
-    var windowEnd: Long,
-    var minValue: Double,
-    var maxValue: Double,
-    var avgValue: Double,
-    var count: Long
+    var sensorName: String = "",
+    var dataType: String = "",
+    var studentId: String = "",
+    var windowStart: Long = 0L,
+    var windowEnd: Long = 0L,
+    var minValue: Double = Double.MAX_VALUE,
+    var maxValue: Double = Double.MIN_VALUE,
+    var avgValue: Double = 0.0,
+    var count: Long = 0L
 )
 
 /**
@@ -177,8 +177,7 @@ class SensorAnalyticsProcessor(private val env: StreamExecutionEnvironment) {
             .setTopicPattern(Pattern.compile(INPUT_TOPIC_PATTERN))
             .setDeserializer(ConsumerRecordDeserializer())
             .setStartingOffsets(OffsetsInitializer.latest())
-            .setProperty("auto.offset.reset", "latest")
-            .setProperty("enable.auto.commit", "false")
+            .setGroupId("s2510082-sensor-flink-analytics-group")
             .build()
     }
     
