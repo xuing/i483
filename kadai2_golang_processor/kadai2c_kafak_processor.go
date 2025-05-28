@@ -91,7 +91,7 @@ func illuminationDataCollector() {
 	r := kafka.NewReader(kafka.ReaderConfig{
 		Brokers:     []string{KafkaBroker},
 		Topic:       topic,
-		GroupID:     topic + "-illumination-collector",
+		GroupID:     topic + "-golang_collector",
 		StartOffset: kafka.LastOffset,
 		MinBytes:    1,
 		MaxBytes:    10e6,
@@ -155,7 +155,7 @@ func co2DataCollector() {
 	r := kafka.NewReader(kafka.ReaderConfig{
 		Brokers:     []string{KafkaBroker},
 		Topic:       topic,
-		GroupID:     topic + "-co2-collector",
+		GroupID:     topic + "golang_collector",
 		StartOffset: kafka.LastOffset,
 		MinBytes:    1,
 		MaxBytes:    10e6,
@@ -278,7 +278,7 @@ func startReader(topic string) {
 	r := kafka.NewReader(kafka.ReaderConfig{
 		Brokers:     []string{KafkaBroker},
 		Topic:       topic,
-		GroupID:     topic + "-golang-general",
+		GroupID:     topic + "-golang_general_reader",
 		StartOffset: kafka.LastOffset,
 		MinBytes:    1,
 		MaxBytes:    10e6,
