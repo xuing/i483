@@ -1,5 +1,4 @@
-FROM maven:3-eclipse-temurin-21 as builder
+FROM maven:3-eclipse-temurin-21
 WORKDIR /build
 COPY . .
-RUN mvn clean package -DskipTests && \
-    rename -v target/*.jar app.jar
+RUN mvn clean package -DskipTests

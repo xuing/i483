@@ -1,11 +1,4 @@
 services:
-  builder:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    volumes:
-      - ./target:/build/target
-
   jobmanager:
     image: flink:2.0-java21
     expose:
@@ -13,8 +6,6 @@ services:
     command: jobmanager
     environment:
       - JOB_MANAGER_RPC_ADDRESS=jobmanager
-    networks:
-      - flink-network
 
   taskmanager:
     image: flink:2.0-java21
@@ -23,22 +14,3 @@ services:
       - jobmanager
     environment:
       - JOB_MANAGER_RPC_ADDRESS=jobmanager
-    networks:
-      - flink-network
-
-  startjob:
-    image: flink:2.0-java21
-    depends_on:
-      - jobmanager
-      - taskmanager
-    volumes:
-      - ./target:/build/target
-    command: flink run -d -c org.jaist.flink.s2510082.SensorAnalyticsJob -m jobmanager:8081 /build/target/app.jar
-    environment:
-      - JOB_MANAGER_RPC_ADDRESS=jobmanager
-    networks:
-      - flink-network
-
-networks:
-  flink-network:
-    driver: bridge

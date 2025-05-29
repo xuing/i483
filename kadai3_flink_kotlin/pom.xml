@@ -21,7 +21,7 @@ under the License.
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.jaist.flink</groupId>
-    <artifactId>flink-java-template</artifactId>
+    <artifactId>kaidai3</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
