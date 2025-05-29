@@ -3,6 +3,8 @@ import asyncio
 from machine import I2C, Pin
 import time
 
+from typing import override
+
 from sensor import Sensor
 
 # Define constants for each operating mode
@@ -47,14 +49,6 @@ class BH1750(Sensor):
         
     @staticmethod
     def display(data):
-        """Format sensor data for display
-        
-        Parameters:
-            data: Dictionary containing sensor readings
-            
-        Returns:
-            Formatted string for display
-        """
         if not data:
             return "BH1750 Light Sensor: No data available"
             
@@ -63,14 +57,6 @@ class BH1750(Sensor):
             result += f"  illumination: {data['illumination']:.2f} lx"
             
         return result
-        
-    # 保留原有方法以兼容
-    def initialize(self):
-        """Initialize the BH1750 sensor
-        
-        Implementation of abstract method from Sensor base class
-        """
-        return self.init()
 
     def stop(self):
         self.power_down()
@@ -78,7 +64,6 @@ class BH1750(Sensor):
     def read_data(self):
         lux = self.read_light()
         self.data = {"illumination": lux}
-        self.last_read_time = time.time()
         return self.data
 
     def power(self, on: bool = True):
@@ -145,12 +130,7 @@ def main():
 
     sensor = BH1750(i2c, mode=CONT_H_RES_MODE)
 
-    # Initialize and start the sensor
-    if not sensor.initialize():
-        print("Failed to initialize sensor.")
-        return
-
-    sensor.start()  # Start background reading task
+    sensor.start()  # Start a background reading task
 
     print("BH1750 sensor initialized and started successfully!")
 

@@ -166,7 +166,7 @@ class DPS310(Sensor):
         super().__init__(i2c, name, address=address)
         self._sea_level_pressure = 1013.25  # Default sea level pressure in hPa
 
-        # Check if device is present
+        # Check if a device is present
         if self._device_id != 0x10:  # Datasheet page 36, PROD_ID is 0x0, REV_ID is 0x1 for 0x10
             raise RuntimeError("Failed to find the DPS310 sensor! Device ID mismatch.")
 
@@ -225,7 +225,7 @@ class DPS310(Sensor):
         return self.data
     
     @staticmethod
-    def display(data):
+    def display(data: dict) -> str:
         """Format sensor data for display
         
         Parameters:
@@ -240,8 +240,8 @@ class DPS310(Sensor):
         result = "DPS310 Pressure/Temperature Sensor:\n"
         if 'temperature' in data:
             result += f"  Temperature: {data['temperature']:.2f} °C\n"
-        if 'pressure' in data:
-            result += f"  Pressure: {data['air_pressure']:.2f} hPa\n"
+        if 'air_pressure' in data:
+            result += f"  Air Pressure: {data['air_pressure']:.2f} hPa\n"
         if 'altitude' in data:
             result += f"  Altitude: {data['altitude']:.2f} m"
             

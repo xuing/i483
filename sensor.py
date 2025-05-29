@@ -24,6 +24,6 @@ class Sensor:
         print(f"[ERROR] {self.name} read() method not implemented")
         raise NotImplementedError("Subclasses must implement read()")
 
-    @classmethod
-    def display(cls, data):
+    @staticmethod
+    def display(data: dict) -> str:
         pass

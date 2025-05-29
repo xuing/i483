@@ -78,14 +78,7 @@ class SCD41(Sensor):
     
     @staticmethod
     def display(data):
-        """Format sensor data for display
-        
-        Parameters:
-            data: Dictionary containing sensor readings
-            
-        Returns:
-            Formatted string for display
-        """
+        """Format sensor data as a string for display"""
         if not data:
             return "SCD41 CO2 Sensor: No data available"
             
