@@ -32,6 +32,7 @@ import org.apache.flink.util.Collector
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.util.regex.Pattern
+import kotlin.math.log
 
 
 /**
@@ -137,55 +138,54 @@ class SensorAnalyticsProcessor(private val env: StreamExecutionEnvironment) {
         private const val JOB_NAME = "Sensor Analytics Job"
         
         // Window configuration
-        private val WINDOW_SIZE = Duration.ofMinutes(1) // 1 minute window
+        private val WINDOW_SIZE = Duration.ofMinutes(5) // 5 minute window
         private val SLIDE_SIZE = Duration.ofSeconds(30) // 30 second slide
     }
-    
+
     fun execute() {
         logger.info("Setting up Kafka source with pattern: $INPUT_TOPIC_PATTERN")
-        
+
         // 1. Create Kafka source
         val kafkaSource = createKafkaSource()
-        logger.info("Kafka source created successfully")
-        
-        // 2. Create data stream from Kafka source
+
+        // 2. Read raw data stream from Kafka
         val rawDataStream = env.fromSource(
             kafkaSource,
-            WatermarkStrategy
-                .forBoundedOutOfOrderness<String>(Duration.ofSeconds(10))
-                .withTimestampAssigner { element, _ ->
-                    val timestamp = SensorDataParser.parseSensorData(element)?.timestamp ?: System.currentTimeMillis()
-                    logger.info("Raw data: $element, Assigned timestamp: $timestamp")
-                    timestamp
-                },
+            WatermarkStrategy.noWatermarks(), // No watermarks for raw data
             "sensor-data-source"
         )
-        logger.info("Raw data stream created with watermark strategy")
-        
-        // 3. Parse and filter sensor data
+
+        // 3. 解析为SensorData对象，并分配水印与时间戳
         val sensorDataStream = rawDataStream
-            .map { rawData -> 
-                logger.info("Processing raw data: $rawData")
-                val parsed = SensorDataParser.parseSensorData(rawData)
-                logger.info("Parsed result: {}", parsed)
-                parsed
+            .map { rawData ->
+                logger.debug("Processing raw data: $rawData")
+                SensorDataParser.parseSensorData(rawData)
             }
-            .filter { 
-                val isValid = it != null
-                logger.info("Filter result: {} for data: {}", isValid, it)
-                isValid
+            .filter {
+                val valid = it != null
+                logger.debug("Filter result: {} for data: {}", valid, it)
+                valid
             }
-            .map { 
-                logger.info("Valid sensor data: {}", it)
+            .map {
+                logger.debug("Valid sensor data: {}", it)
                 it!!
             }
-        logger.info("Sensor data parsing and filtering configured")
+            .assignTimestampsAndWatermarks(
+                WatermarkStrategy
+                    .forBoundedOutOfOrderness<SensorData>(Duration.ofSeconds(10))
+                    .withTimestampAssigner { element, _ ->
+                        logger.info("Assigning event time: {} to {}", element.timestamp, element)
+                        element.timestamp
+                    }
+                    .withIdleness(Duration.ofSeconds(60)) // 防止source分区空闲时水印不前进
+            )
+        logger.info("Sensor data stream with watermarks assigned")
 
         // 4. Group by sensor type and measurement type, apply sliding window
         val analyticsStream = sensorDataStream
-            .keyBy { 
+            .keyBy {
                 val key = SensorKey(it.sensorName, it.dataType)
-                logger.info("Grouping data by key: {}, data: {}", key, it)
+                logger.debug("Grouping data by key: {}, data: {}", key, it)
                 key
             }
             .window(SlidingEventTimeWindows.of(WINDOW_SIZE, SLIDE_SIZE))
@@ -193,19 +193,11 @@ class SensorAnalyticsProcessor(private val env: StreamExecutionEnvironment) {
                 SensorStatsAggregateFunction(),
                 SensorStatsProcessWindowFunction()
             )
-        logger.info("Analytics stream configured with window size: $WINDOW_SIZE, slide: $SLIDE_SIZE")
-        
+
         // 5. Output to console (for debugging)
         analyticsStream.print("Analytics Results")
-        logger.info("Analytics results will be printed to console")
-        
-        // 6. Send results to Kafka (commented out for debugging)
-//        val kafkaSink = createKafkaSink()
-//        analyticsStream
-//            .map { stats -> SensorDataParser.formatOutputMessage(stats) }
-//            .sinkTo(kafkaSink)
 
-        // 7. Execute job
+        // 6. Execute job
         logger.info("Starting execution of $JOB_NAME")
         env.execute(JOB_NAME)
     }
@@ -371,6 +363,7 @@ object SensorDataParser {
 
 /**
  * Sensor statistics window processing function
+ * TODO 没输出
  */
 class SensorStatsProcessWindowFunction : ProcessWindowFunction<StatsAccumulator, SensorStats, SensorKey, TimeWindow>() {
     private val logger = LoggerFactory.getLogger(SensorStatsProcessWindowFunction::class.java)
@@ -392,8 +385,8 @@ class SensorStatsProcessWindowFunction : ProcessWindowFunction<StatsAccumulator,
         logger.info("Accumulator data - count: ${accumulator.count}, sum: ${accumulator.sum}, min: ${accumulator.min}, max: ${accumulator.max}")
         
         if (accumulator.count > 0) {
-            // For 15 second intervals, 1 minute window, count should be around 4
-            val expectedCount = 4L // Adjusted for 1 minute window
+            // For 15 second intervals, 1-minute window, count should be around 4
+            val expectedCount = (context.window().end - context.window().start) / 15000 // 15 seconds
             if (accumulator.count != expectedCount) {
                 logger.info("Window processing - key: $key, actual count: ${accumulator.count}, expected: $expectedCount")
             }
