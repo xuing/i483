@@ -19,7 +19,7 @@ package org.jaist.flink.samplejob
 
 import org.apache.flink.api.common.eventtime.WatermarkStrategy
 import org.apache.flink.api.common.functions.AggregateFunction
-import org.apache.flink.api.common.serialization.SimpleStringSchema
+import org.apache.flink.api.common.typeinfo.Types
 import org.apache.flink.connector.kafka.sink.KafkaRecordSerializationSchema
 import org.apache.flink.connector.kafka.sink.KafkaSink
 import org.apache.flink.connector.kafka.source.KafkaSource
@@ -32,7 +32,6 @@ import org.apache.flink.util.Collector
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.util.regex.Pattern
-import kotlin.math.log
 
 
 /**
@@ -69,6 +68,12 @@ data class SensorStats(
     var avgValue: Double = 0.0,
     var count: Long = 0L
 )
+
+data class AnalyticsKafkaRecord(
+    var topic: String = "",
+    var value: String = ""
+)
+
 
 /**
  * Aggregation accumulator
@@ -188,6 +193,20 @@ class SensorAnalyticsProcessor(private val env: StreamExecutionEnvironment) {
         // 5. Output to console (for debugging)
         analyticsStream.print("Analytics Results")
 
+        // 5. Create Kafka sink for output
+        val kafkaSink = createKafkaSink()
+        analyticsStream
+            .flatMap {stats, out: Collector<AnalyticsKafkaRecord> ->
+                assert(stats.studentId == "s2510082") { "Student ID must be s2510082" }
+                val baseTopic = "${OUTPUT_TOPIC_PREFIX}-${stats.sensorName}"
+                out.collect(AnalyticsKafkaRecord("${baseTopic}_min-${stats.dataType}", stats.minValue.toString()))
+                out.collect(AnalyticsKafkaRecord("${baseTopic}_max-${stats.dataType}", stats.maxValue.toString()))
+                out.collect(AnalyticsKafkaRecord("${baseTopic}_avg-${stats.dataType}", stats.avgValue.toString()))
+            }
+            .returns(Types.POJO(AnalyticsKafkaRecord::class.java))
+            .sinkTo(kafkaSink)
+            .name("Kafka Analytics Sink")
+
         // 6. Execute job
         logger.info("Starting execution of $JOB_NAME")
         env.execute(JOB_NAME)
@@ -202,17 +221,18 @@ class SensorAnalyticsProcessor(private val env: StreamExecutionEnvironment) {
             .setGroupId("s2510082-sensor-flink-analytics-group")
             .build()
     }
-    
-    private fun createKafkaSink(): KafkaSink<String> {
-        return KafkaSink.builder<String>()
+
+    private fun createKafkaSink(): KafkaSink<AnalyticsKafkaRecord> {
+        return KafkaSink.builder<AnalyticsKafkaRecord>()
             .setBootstrapServers(KAFKA_BOOTSTRAP_SERVERS)
             .setRecordSerializer(
-                KafkaRecordSerializationSchema.builder<String>()
-                    .setTopicSelector<String> { record ->
-                        // 从记录中提取topic名称
-                        SensorDataParser.extractTopicFromRecord(record)
+                KafkaRecordSerializationSchema.builder<AnalyticsKafkaRecord>()
+                    .setTopicSelector<AnalyticsKafkaRecord> { record ->
+                        record.topic
                     }
-                    .setValueSerializationSchema(SimpleStringSchema())
+                    .setValueSerializationSchema<AnalyticsKafkaRecord>{ record ->
+                        record.value.toByteArray(Charsets.UTF_8)
+                    }
                     .build()
             )
             .build()
@@ -226,8 +246,7 @@ class SensorAnalyticsProcessor(private val env: StreamExecutionEnvironment) {
  * Sensor statistics aggregation function
  */
 class SensorStatsAggregateFunction : AggregateFunction<SensorData, StatsAccumulator, StatsAccumulator> {
-    private val logger = LoggerFactory.getLogger(SensorStatsAggregateFunction::class.java)
-    
+
     override fun createAccumulator(): StatsAccumulator {
         return StatsAccumulator()
     }
@@ -316,38 +335,7 @@ object SensorDataParser {
              return null
          }
      }
-     
-     /**
-      * Format output message
-      */
-     fun formatOutputMessage(stats: SensorStats): String {
-         val message = "${stats.sensorName}|${stats.dataType}|min|${stats.minValue}\n" +
-                "${stats.sensorName}|${stats.dataType}|max|${stats.maxValue}\n" +
-                "${stats.sensorName}|${stats.dataType}|avg|${stats.avgValue}"
-         logger.info("Formatted output message: $message")
-         return message
-     }
-     
-     /**
-      * Extract target topic name from output record
-      */
-     fun extractTopicFromRecord(record: String): String {
-         try {
-             // Record format contains sensor type and measurement type information
-             val parts = record.split("|")
-             if (parts.size >= 3) {
-                 val sensorType = parts[0]
-                 val measurementType = parts[1]
-                 val statType = parts[2] // min, max, avg
-                 val topicName = "i483-sensors-s2510082-analytics-$sensorType-$statType-$measurementType"
-                 logger.info("Extracted topic name: $topicName from record: $record")
-                 return topicName
-             }
-         } catch (e: Exception) {
-             logger.warn("Failed to extract topic name: $record", e)
-         }
-         return "i483-sensors-s2510082-analytics-unknown"
-     }
+
  }
 
 /**
@@ -389,8 +377,8 @@ class SensorStatsProcessWindowFunction : ProcessWindowFunction<StatsAccumulator,
                 avgValue = accumulator.sum / accumulator.count,
                 count = accumulator.count
             )
-            
-            logger.debug("Emitting stats: $stats")
+
+            logger.debug("Emitting stats: {}", stats)
             out.collect(stats)
         } else {
             logger.info("No data in window for key: {}", key)
