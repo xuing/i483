@@ -41,10 +41,7 @@ import kotlin.math.log
 data class SensorKey(
     var sensorName: String = "",
     var dataType: String = ""
-) {
-    // No-arg constructor for POJO compatibility
-    constructor() : this("", "")
-}
+)
 
 /**
  * Sensor data class - POJO compatible
@@ -56,10 +53,7 @@ data class SensorData(
     var timestamp: Long = 0L,
     var value: Double = 0.0,
     var studentId: String = ""
-) {
-    // No-arg constructor for POJO compatibility
-    constructor() : this("", "", "", 0L, 0.0, "")
-}
+)
 
 /**
  * Aggregated statistics result class - POJO compatible
@@ -74,10 +68,7 @@ data class SensorStats(
     var maxValue: Double = 0.0,
     var avgValue: Double = 0.0,
     var count: Long = 0L
-) {
-    // No-arg constructor for POJO compatibility
-    constructor() : this("", "", "", 0L, 0L, 0.0, 0.0, 0.0, 0L)
-}
+)
 
 /**
  * Aggregation accumulator
@@ -138,7 +129,7 @@ class SensorAnalyticsProcessor(private val env: StreamExecutionEnvironment) {
         private const val JOB_NAME = "Sensor Analytics Job"
         
         // Window configuration
-        private val WINDOW_SIZE = Duration.ofMinutes(5) // 5 minute window
+        private val WINDOW_SIZE = Duration.ofMinutes(5) // 5-minute window
         private val SLIDE_SIZE = Duration.ofSeconds(30) // 30 second slide
     }
 
@@ -155,7 +146,7 @@ class SensorAnalyticsProcessor(private val env: StreamExecutionEnvironment) {
             "sensor-data-source"
         )
 
-        // 3. 解析为SensorData对象，并分配水印与时间戳
+        // 3. Parse raw data into SensorData objects and assign watermarks
         val sensorDataStream = rawDataStream
             .map { rawData ->
                 logger.debug("Processing raw data: $rawData")
@@ -174,7 +165,7 @@ class SensorAnalyticsProcessor(private val env: StreamExecutionEnvironment) {
                 WatermarkStrategy
                     .forBoundedOutOfOrderness<SensorData>(Duration.ofSeconds(10))
                     .withTimestampAssigner { element, _ ->
-                        logger.info("Assigning event time: {} to {}", element.timestamp, element)
+                        logger.debug("Assigning event time: {} to {}", element.timestamp, element)
                         element.timestamp
                     }
                     .withIdleness(Duration.ofSeconds(60)) // 防止source分区空闲时水印不前进
@@ -242,12 +233,10 @@ class SensorStatsAggregateFunction : AggregateFunction<SensorData, StatsAccumula
     }
     
     override fun add(value: SensorData, accumulator: StatsAccumulator): StatsAccumulator {
-        logger.info("Adding value to accumulator: ${value.value}, current count: ${accumulator.count}")
         accumulator.sum += value.value
         accumulator.count++
         accumulator.min = minOf(accumulator.min, value.value)
         accumulator.max = maxOf(accumulator.max, value.value)
-        logger.info("Updated accumulator - sum: ${accumulator.sum}, count: ${accumulator.count}, min: ${accumulator.min}, max: ${accumulator.max}")
         return accumulator
     }
     
@@ -278,10 +267,10 @@ object SensorDataParser {
      */
     fun parseSensorData(rawData: String): SensorData? {
         try {
-            logger.info("Parsing raw data: $rawData")
+            logger.debug("Parsing raw data: $rawData")
             val parts = rawData.split(",")
             if (parts.size < 3) {
-                logger.info("Invalid data format - insufficient parts: ${parts.size}")
+                logger.warn("Invalid data format - insufficient parts: ${parts.size}")
                 return null
             }
             
@@ -289,21 +278,21 @@ object SensorDataParser {
             // Timestamp must exist
             val timestamp = parts[1].toLongOrNull()
             if (timestamp == null) {
-                logger.info("Invalid timestamp: ${parts[1]}")
+                logger.warn("Invalid timestamp: ${parts[1]}")
                 return null
             }
             
             val value = parts[2].toDoubleOrNull()
             if (value == null) {
-                logger.info("Invalid value: ${parts[2]}")
+                logger.warn("Invalid value: ${parts[2]}")
                 return null
             }
             
             // Parse topic to extract sensor information
             // Format: i483-sensors-s2510082-SensorName-DataType
             val topicParts = topic.split("-")
-            if (topicParts.size < 5) {
-                logger.info("Invalid topic format: $topic, parts: ${topicParts.size}")
+            if (topicParts.size != 5 || topicParts[0] != "i483" || topicParts[1] != "sensors" || topicParts[2] != "s2510082") {
+                logger.warn("Invalid topic format: $topic, parts: ${topicParts.size}")
                 return null
             }
             
@@ -320,7 +309,7 @@ object SensorDataParser {
                 studentId = studentId
             )
 
-            logger.info("Successfully parsed sensor data: {}", sensorData)
+            logger.debug("Successfully parsed sensor data: {}", sensorData)
             return sensorData
         } catch (e: Exception) {
              logger.warn("Failed to parse sensor data: $rawData", e)
@@ -363,7 +352,6 @@ object SensorDataParser {
 
 /**
  * Sensor statistics window processing function
- * TODO 没输出
  */
 class SensorStatsProcessWindowFunction : ProcessWindowFunction<StatsAccumulator, SensorStats, SensorKey, TimeWindow>() {
     private val logger = LoggerFactory.getLogger(SensorStatsProcessWindowFunction::class.java)
@@ -374,7 +362,7 @@ class SensorStatsProcessWindowFunction : ProcessWindowFunction<StatsAccumulator,
         elements: Iterable<StatsAccumulator>,
         out: Collector<SensorStats>
     ) {
-        logger.info(
+        logger.debug(
             "Processing window for key: {}, window: {} - {}",
             key,
             context.window().start,
@@ -382,8 +370,7 @@ class SensorStatsProcessWindowFunction : ProcessWindowFunction<StatsAccumulator,
         )
         
         val accumulator = elements.first()
-        logger.info("Accumulator data - count: ${accumulator.count}, sum: ${accumulator.sum}, min: ${accumulator.min}, max: ${accumulator.max}")
-        
+
         if (accumulator.count > 0) {
             // For 15 second intervals, 1-minute window, count should be around 4
             val expectedCount = (context.window().end - context.window().start) / 15000 // 15 seconds
@@ -403,7 +390,7 @@ class SensorStatsProcessWindowFunction : ProcessWindowFunction<StatsAccumulator,
                 count = accumulator.count
             )
             
-            logger.info("Emitting stats: $stats")
+            logger.debug("Emitting stats: $stats")
             out.collect(stats)
         } else {
             logger.info("No data in window for key: {}", key)
