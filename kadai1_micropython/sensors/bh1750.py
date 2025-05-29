@@ -1,11 +1,8 @@
-import asyncio
-
-from machine import I2C, Pin
 import time
 
-from typing import override
+from machine import I2C, Pin
 
-from sensor import Sensor
+from sensors.sensor import Sensor
 
 # Define constants for each operating mode
 CONT_H_RES_MODE = 0x10  # Continuous high resolution mode (1 lx)

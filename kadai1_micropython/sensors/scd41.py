@@ -6,8 +6,8 @@ For ESP32 Platform
 import time
 from machine import I2C, Pin
 
-from sensor import Sensor
-from utils import current_time
+from utils.utils import current_time
+from sensors.sensor import Sensor
 
 # SCD41 I2C Address
 SCD41_I2C_ADDR_62 = 0x62
@@ -38,6 +38,27 @@ CMD_MEASURE_SINGLE_SHOT = 0x219D
 CMD_MEASURE_SINGLE_SHOT_RHT_ONLY = 0x2196
 CMD_POWER_DOWN = 0x36E0
 CMD_WAKE_UP = 0x36F6
+
+
+def calculate_crc(data):
+    """
+    Calculate CRC checksum
+
+    Parameters:
+        data: Two-byte data
+
+    Returns:
+        CRC checksum
+    """
+    crc = 0xFF
+    for byte in data:
+        crc ^= byte
+        for _ in range(8):
+            if crc & 0x80:
+                crc = (crc << 1) ^ 0x31
+            else:
+                crc = crc << 1
+    return crc & 0xFF
 
 
 class SCD41(Sensor):
@@ -92,26 +113,6 @@ class SCD41(Sensor):
             
         return result
 
-    def _calculate_crc(self, data):
-        """
-        Calculate CRC checksum
-        
-        Parameters:
-            data: Two-byte data
-            
-        Returns:
-            CRC checksum
-        """
-        crc = 0xFF
-        for byte in data:
-            crc ^= byte
-            for _ in range(8):
-                if crc & 0x80:
-                    crc = (crc << 1) ^ 0x31
-                else:
-                    crc = crc << 1
-        return crc & 0xFF
-
     def _send_command(self, cmd):
         """
         Send command to sensor
@@ -149,7 +150,7 @@ class SCD41(Sensor):
                 lsb = word & 0xFF
                 buffer.append(msb)
                 buffer.append(lsb)
-                buffer.append(self._calculate_crc([msb, lsb]))
+                buffer.append(calculate_crc([msb, lsb]))
 
             self.i2c.writeto(self.address, bytes(buffer))
             return NO_ERROR
@@ -180,8 +181,8 @@ class SCD41(Sensor):
                 crc = data[i + 2]
 
                 # Verify CRC
-                if self._calculate_crc([msb, lsb]) != crc:
-                    print(f"CRC error: Calculated {self._calculate_crc([msb, lsb])} != Received {crc}")
+                if calculate_crc([msb, lsb]) != crc:
+                    print(f"CRC error: Calculated {calculate_crc([msb, lsb])} != Received {crc}")
                     return ERROR_GENERAL, []
 
                 word = (msb << 8) | lsb
@@ -232,15 +233,6 @@ class SCD41(Sensor):
         time.sleep_ms(delay_ms)
 
         return self._read_words(num_words)
-
-    def init(self):
-        """
-        Initialize sensor
-        
-        Returns:
-            NO_ERROR on success, error code on failure
-        """
-        return NO_ERROR  # ESP32's I2C is already initialized in constructor
 
     def wake_up(self):
         """
@@ -650,8 +642,8 @@ def main():
             continue
 
         # Create and store reading
-        current_time = time.time() - start_time
-        reading = SensorData(co2, temperature, humidity, current_time)
+        pass_time = time.time() - start_time
+        reading = SensorData(co2, temperature, humidity, pass_time)
         readings.append(reading)
 
         # Print formatted results

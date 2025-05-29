@@ -4,8 +4,8 @@ import time
 
 from micropython import const
 
-from i2c_helpers import RegisterStruct
-from sensor import Sensor
+from utils.i2c_helpers import RegisterStruct
+from sensors.sensor import Sensor
 
 # RPR-0521RS Device Address
 RPR0521RS_DEVICE_ADDRESS = const(0x38)  # 7bit Address
@@ -37,12 +37,12 @@ RPR0521RS_ALS_PS_CONTROL_DATA0_GAIN_X1 = const(0 << 4)
 RPR0521RS_PS_CONTROL_PS_GAINX1 = const(0 << 4)
 
 # Default Combined Register Values
-RPR0521RS_MODE_CONTROL_VAL = const(RPR0521RS_MODE_CONTROL_MEASTIME_100_100MS | 
-                                 RPR0521RS_MODE_CONTROL_PS_EN | 
-                                 RPR0521RS_MODE_CONTROL_ALS_EN)
-RPR0521RS_ALS_PS_CONTROL_VAL = const(RPR0521RS_ALS_PS_CONTROL_DATA0_GAIN_X1 | 
-                                   RPR0521RS_ALS_PS_CONTROL_DATA1_GAIN_X1 | 
-                                   RPR0521RS_ALS_PS_CONTROL_LED_CURRENT_100MA)
+RPR0521RS_MODE_CONTROL_VAL = const(RPR0521RS_MODE_CONTROL_MEASTIME_100_100MS |
+                                   RPR0521RS_MODE_CONTROL_PS_EN |
+                                   RPR0521RS_MODE_CONTROL_ALS_EN)
+RPR0521RS_ALS_PS_CONTROL_VAL = const(RPR0521RS_ALS_PS_CONTROL_DATA0_GAIN_X1 |
+                                     RPR0521RS_ALS_PS_CONTROL_DATA1_GAIN_X1 |
+                                     RPR0521RS_ALS_PS_CONTROL_LED_CURRENT_100MA)
 RPR0521RS_PS_CONTROL_VAL = const(RPR0521RS_PS_CONTROL_PS_GAINX1)
 
 # Proximity Threshold
@@ -88,12 +88,12 @@ class RPR0521RS(Sensor):
 
         # Initialize device
         self._init_sensor()
-        
+
     def start(self):
         """Initialize the sensor (already done in __init__)"""
         # Initialization already done in __init__
         return True
-        
+
     def read(self):
         """Read sensor data and return as dictionary"""
         self.data = {
@@ -103,7 +103,7 @@ class RPR0521RS(Sensor):
             'infrared_illumination': self.infrared_illumination,
         }
         return self.data
-    
+
     @staticmethod
     def display(data):
         """Format sensor data for display
@@ -116,7 +116,7 @@ class RPR0521RS(Sensor):
         """
         if not data:
             return "RPR0521RS Ambient Light/Proximity Sensor: No data available"
-            
+
         result = "RPR0521RS Ambient Light/Proximity Sensor:\n"
         if 'ambient_light' in data:
             result += f"  Ambient Light: {data['ambient_light']:.2f} lx\n"
@@ -126,7 +126,7 @@ class RPR0521RS(Sensor):
             result += f"  Illumination: {data['illumination']:.2f} lx\n"
         if 'infrared_illumination' in data:
             result += f"  Infrared Illumination: {data['infrared_illumination']:.2f} lx"
-            
+
         return result
 
     def _init_sensor(self):
@@ -302,6 +302,7 @@ class RPR0521RS(Sensor):
         """Reset the sensor to default settings."""
         # Reset sensor by re-initializing
         self._init_sensor()
+
 
 if __name__ == "__main__":
     """Example usage of the RPR-0521RS driver."""

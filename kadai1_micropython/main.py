@@ -6,14 +6,12 @@ import asyncio
 from machine import I2C, Pin
 from umqtt.robust import MQTTClient
 
-from bh1750 import BH1750
-from dps310 import DPS310
-from rpr0521rs import RPR0521RS
-# Import sensor modules
-from scd41 import SCD41
-from sensor import Sensor
-# Import utility modules
-from utils import show_mac_address, connect_wifi, sync_rtc, current_time
+from sensors.bh1750 import BH1750
+from sensors.dps310 import DPS310
+from sensors.rpr0521rs import RPR0521RS
+from sensors.scd41 import SCD41
+from sensors.sensor import Sensor
+from utils.utils import show_mac_address, connect_wifi, sync_rtc, current_time
 
 
 class AsyncSensorManager:

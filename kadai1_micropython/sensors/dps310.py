@@ -8,8 +8,8 @@ import time
 
 from micropython import const
 
-from i2c_helpers import RegisterStruct, CBits
-from sensor import Sensor
+from sensors.sensor import Sensor
+from utils.i2c_helpers import CBits, RegisterStruct
 
 # Register Addresses
 _DEVICE_ID = const(0x0D)
