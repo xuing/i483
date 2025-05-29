@@ -1,4 +1,4 @@
-package org.jaist.flink.samplejob
+package org.jaist.flink.s2510082
 
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.connector.kafka.source.reader.deserializer.KafkaRecordDeserializationSchema
