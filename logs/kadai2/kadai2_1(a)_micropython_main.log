@@ -1,0 +1,172 @@
+>>>
+MPY: soft reboot
+
+=== I483 - Kadai1 - XU Pengfei(2510082) ===
+Multi-sensor Data Acquisition System - Async Implementation
+MAC address: 24:62:AB:E1:23:24
+Connecting to WiFi...
+Already connected to WiFi
+IP address: 192.168.137.228
+Syncing RTC time...
+RTC time synchronized: 2025-05-31 14:54:53
+MQTT connection result: 0
+MQTT subscribe result: None
+
+=== Initializing Sensors ===
+[INFO] SCD41 initialized successfully
+[INFO] BH1750 initialized successfully
+[INFO] RPR0521RS initialized successfully
+[INFO] DPS310 initialized successfully
+
+=== All Sensors Initialized ===
+
+Starting async sensor data acquisition...
+Press Ctrl+C to stop the program
+[DEBUG] sensor_reader_async started, task_id: 1073644928
+[DEBUG] Task 1073644928 - Starting sensor read cycle
+
+=== Sensor Data [2025-05-31 14:54:54] ===
+SCD41 CO2 Sensor: No data available
+BH1750 Light Sensor:
+  illumination: 60.83 lx
+RPR0521RS Ambient Light/Proximity Sensor:
+  Ambient Light: 8.73 lx
+  Proximity: 158
+  Illumination: 13.00 lx
+  Infrared Illumination: 7.00 lx
+DPS310 Pressure/Temperature Sensor:
+  Temperature: 24.14 °C
+  Air Pressure: 986.82 hPa
+  Altitude: 222.42 m
+[MQTT] Publishing i483/sensors/s2510082/BH1750/illumination: 60.83
+[MQTT] Publishing i483/sensors/s2510082/RPR0521RS/ambient_light: 8.73
+[MQTT] Publishing i483/sensors/s2510082/RPR0521RS/proximity: 158
+[MQTT] Publishing i483/sensors/s2510082/RPR0521RS/illumination: 13.00
+[MQTT] Publishing i483/sensors/s2510082/RPR0521RS/infrared_illumination: 7.00
+[MQTT] Publishing i483/sensors/s2510082/DPS310/altitude: 222.42
+[MQTT] Publishing i483/sensors/s2510082/DPS310/air_pressure: 986.82
+[MQTT] Publishing i483/sensors/s2510082/DPS310/temperature: 24.14
+[DEBUG] Task 1073644928 - Cycle complete, sleeping for 15s
+[DEBUG] Task 1073644928 - Starting sensor read cycle
+
+=== Sensor Data [2025-05-31 14:55:11] ===
+SCD41 CO2 Sensor:
+  CO2: 403 ppm
+  Temperature: 25.87 °C
+  Humidity: 56.18 %
+BH1750 Light Sensor:
+  illumination: 65.00 lx
+RPR0521RS Ambient Light/Proximity Sensor:
+  Ambient Light: 7.05 lx
+  Proximity: 158
+  Illumination: 12.00 lx
+  Infrared Illumination: 7.00 lx
+DPS310 Pressure/Temperature Sensor:
+  Temperature: 24.17 °C
+  Air Pressure: 986.81 hPa
+  Altitude: 222.44 m
+[MQTT] Publishing i483/sensors/s2510082/SCD41/co2: 403
+[MQTT] Publishing i483/sensors/s2510082/SCD41/humidity: 56.18
+[MQTT] Publishing i483/sensors/s2510082/SCD41/temperature: 25.87
+[MQTT] Publishing i483/sensors/s2510082/BH1750/illumination: 65.00
+[MQTT] Publishing i483/sensors/s2510082/RPR0521RS/ambient_light: 7.05
+[MQTT] Publishing i483/sensors/s2510082/RPR0521RS/proximity: 158
+[MQTT] Publishing i483/sensors/s2510082/RPR0521RS/illumination: 12.00
+[MQTT] Publishing i483/sensors/s2510082/RPR0521RS/infrared_illumination: 7.00
+[MQTT] Publishing i483/sensors/s2510082/DPS310/altitude: 222.44
+[MQTT] Publishing i483/sensors/s2510082/DPS310/air_pressure: 986.81
+[MQTT] Publishing i483/sensors/s2510082/DPS310/temperature: 24.17
+[DEBUG] Task 1073644928 - Cycle complete, sleeping for 15s
+[DEBUG] Task 1073644928 - Starting sensor read cycle
+[ERROR] BH1750 error reading light level: [Errno 116] ETIMEDOUT
+
+=== Sensor Data [2025-05-31 14:55:27] ===
+SCD41 CO2 Sensor:
+  CO2: 439 ppm
+  Temperature: 25.53 °C
+  Humidity: 57.85 %
+BH1750 Light Sensor:
+  illumination: 65.00 lx
+RPR0521RS Ambient Light/Proximity Sensor:
+  Ambient Light: 12.29 lx
+  Proximity: 158
+  Illumination: 14.00 lx
+  Infrared Illumination: 6.00 lx
+DPS310 Pressure/Temperature Sensor:
+  Temperature: 24.20 °C
+  Air Pressure: 986.82 hPa
+  Altitude: 222.42 m
+[MQTT] Publishing i483/sensors/s2510082/SCD41/co2: 439
+[MQTT] Publishing i483/sensors/s2510082/SCD41/humidity: 57.85
+[MQTT] Publishing i483/sensors/s2510082/SCD41/temperature: 25.53
+[MQTT] Publishing i483/sensors/s2510082/BH1750/illumination: 65.00
+[MQTT] Publishing i483/sensors/s2510082/RPR0521RS/ambient_light: 12.29
+[MQTT] Publishing i483/sensors/s2510082/RPR0521RS/proximity: 158
+[MQTT] Publishing i483/sensors/s2510082/RPR0521RS/illumination: 14.00
+[MQTT] Publishing i483/sensors/s2510082/RPR0521RS/infrared_illumination: 6.00
+[MQTT] Publishing i483/sensors/s2510082/DPS310/altitude: 222.42
+[MQTT] Publishing i483/sensors/s2510082/DPS310/air_pressure: 986.82
+[MQTT] Publishing i483/sensors/s2510082/DPS310/temperature: 24.20
+[DEBUG] Task 1073644928 - Cycle complete, sleeping for 15s
+[DEBUG] Task 1073644928 - Starting sensor read cycle
+
+=== Sensor Data [2025-05-31 14:55:43] ===
+SCD41 CO2 Sensor:
+  CO2: 438 ppm
+  Temperature: 25.18 °C
+  Humidity: 59.55 %
+BH1750 Light Sensor:
+  illumination: 63.33 lx
+RPR0521RS Ambient Light/Proximity Sensor:
+  Ambient Light: 8.92 lx
+  Proximity: 158
+  Illumination: 12.00 lx
+  Infrared Illumination: 6.00 lx
+DPS310 Pressure/Temperature Sensor:
+  Temperature: 24.23 °C
+  Air Pressure: 986.81 hPa
+  Altitude: 222.44 m
+[MQTT] Publishing i483/sensors/s2510082/SCD41/co2: 438
+[MQTT] Publishing i483/sensors/s2510082/SCD41/humidity: 59.55
+[MQTT] Publishing i483/sensors/s2510082/SCD41/temperature: 25.18
+[MQTT] Publishing i483/sensors/s2510082/BH1750/illumination: 63.33
+[MQTT] Publishing i483/sensors/s2510082/RPR0521RS/ambient_light: 8.92
+[MQTT] Publishing i483/sensors/s2510082/RPR0521RS/proximity: 158
+[MQTT] Publishing i483/sensors/s2510082/RPR0521RS/illumination: 12.00
+[MQTT] Publishing i483/sensors/s2510082/RPR0521RS/infrared_illumination: 6.00
+[MQTT] Publishing i483/sensors/s2510082/DPS310/altitude: 222.44
+[MQTT] Publishing i483/sensors/s2510082/DPS310/air_pressure: 986.81
+[MQTT] Publishing i483/sensors/s2510082/DPS310/temperature: 24.23
+[DEBUG] Task 1073644928 - Cycle complete, sleeping for 15s
+[DEBUG] Task 1073644928 - Starting sensor read cycle
+[ERROR] BH1750 error reading light level: [Errno 116] ETIMEDOUT
+
+=== Sensor Data [2025-05-31 14:56:00] ===
+SCD41 CO2 Sensor:
+  CO2: 436 ppm
+  Temperature: 24.97 °C
+  Humidity: 60.40 %
+BH1750 Light Sensor:
+  illumination: 63.33 lx
+RPR0521RS Ambient Light/Proximity Sensor:
+  Ambient Light: 7.05 lx
+  Proximity: 157
+  Illumination: 12.00 lx
+  Infrared Illumination: 7.00 lx
+DPS310 Pressure/Temperature Sensor:
+  Temperature: 24.28 °C
+  Air Pressure: 986.82 hPa
+  Altitude: 222.41 m
+[MQTT] Publishing i483/sensors/s2510082/SCD41/co2: 436
+[MQTT] Publishing i483/sensors/s2510082/SCD41/humidity: 60.40
+[MQTT] Publishing i483/sensors/s2510082/SCD41/temperature: 24.97
+[MQTT] Publishing i483/sensors/s2510082/BH1750/illumination: 63.33
+[MQTT] Publishing i483/sensors/s2510082/RPR0521RS/ambient_light: 7.05
+[MQTT] Publishing i483/sensors/s2510082/RPR0521RS/proximity: 157
+[MQTT] Publishing i483/sensors/s2510082/RPR0521RS/illumination: 12.00
+[MQTT] Publishing i483/sensors/s2510082/RPR0521RS/infrared_illumination: 7.00
+[MQTT] Publishing i483/sensors/s2510082/DPS310/altitude: 222.41
+[MQTT] Publishing i483/sensors/s2510082/DPS310/air_pressure: 986.82
+[MQTT] Publishing i483/sensors/s2510082/DPS310/temperature: 24.28
+[DEBUG] Task 1073644928 - Cycle complete, sleeping for 15s
+[DEBUG] Task 1073644928 - Starting sensor read cycle
