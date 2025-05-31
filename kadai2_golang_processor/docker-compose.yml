@@ -1,0 +1,8 @@
+services:
+  kafka-processor:
+    build:
+      context: .
+    container_name: kadai2c_kafka-processor
+    environment:
+      - KAFKA_BROKER=150.65.230.59:9092
+    restart: unless-stopped

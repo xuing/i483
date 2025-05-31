@@ -19,20 +19,6 @@ const (
 	Co2Threshold = 700 // CO2 threshold in ppm
 )
 
-var sensors = []string{
-	"SCD41/co2",
-	"SCD41/temperature",
-	"SCD41/humidity",
-	"BH1750/illumination",
-	"RPR0521RS/ambient_light",
-	"RPR0521RS/proximity",
-	"RPR0521RS/illumination",
-	"RPR0521RS/infrared_illumination",
-	"DPS310/temperature",
-	"DPS310/air_pressure",
-	"DPS310/altitude",
-}
-
 // SensorData Data structure definition
 type SensorData struct {
 	Value     float64
@@ -47,7 +33,7 @@ var (
 	statusLock       sync.RWMutex
 )
 
-func makeTopic(sensor string) string {
+func makeSensorsTopic(sensor string) string {
 	return "i483-sensors-" + studentID + "-" + sensorToKafka(sensor)
 }
 
@@ -88,7 +74,7 @@ func parseValue(message string) (float64, error) {
 
 // BH1750 illumination data collector
 func illuminationDataCollector() {
-	topic := makeTopic("BH1750/illumination")
+	topic := makeSensorsTopic("BH1750/illumination")
 
 	r := kafka.NewReader(kafka.ReaderConfig{
 		Brokers:     []string{KafkaBroker},
@@ -150,7 +136,7 @@ func illuminationDataCollector() {
 
 // CO2 data collector
 func co2DataCollector() {
-	topic := makeTopic("SCD41/co2")
+	topic := makeSensorsTopic("SCD41/co2")
 
 	r := kafka.NewReader(kafka.ReaderConfig{
 		Brokers:     []string{KafkaBroker},
@@ -263,41 +249,6 @@ func checkCO2Threshold(co2Value float64) {
 	}
 }
 
-// General sensor data reader (for displaying other sensor data)
-func startReader(topic string) {
-	r := kafka.NewReader(kafka.ReaderConfig{
-		Brokers:     []string{KafkaBroker},
-		Topic:       topic,
-		GroupID:     topic + "-golang_general_reader",
-		StartOffset: kafka.LastOffset,
-	})
-	defer func(r *kafka.Reader) {
-		err := r.Close()
-		if err != nil {
-			log.Printf("<UNK> [Start Reader] Error closing reader: %v", err)
-		}
-	}(r)
-
-	fmt.Printf("📡 [General] Listening to: %s\n", topic)
-
-	for {
-		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
-		m, err := r.ReadMessage(ctx)
-		cancel()
-
-		if err != nil {
-			if errors.Is(err, context.DeadlineExceeded) {
-				continue
-			}
-			log.Printf("❗ [%s] Error: %v", topic, err)
-			time.Sleep(time.Second)
-			continue
-		}
-
-		fmt.Printf("✅ [%s] offset %d: %s\n", topic, m.Offset, string(m.Value))
-	}
-}
-
 func main() {
 	fmt.Println("🚀 Advanced Kafka Sensor Processor starting...")
 	fmt.Printf("📋 Student ID: %s\n", studentID)
@@ -317,12 +268,6 @@ func main() {
 
 	// Start rolling average processor
 	go rollingAverageProcessor()
-
-	// Start general readers for other sensors
-	//for _, s := range sensors {
-	//	topic := makeTopic(s)
-	//	go startReader(topic)
-	//}
 
 	fmt.Println("✅ All processors started successfully!")
 	select {} // Block forever
