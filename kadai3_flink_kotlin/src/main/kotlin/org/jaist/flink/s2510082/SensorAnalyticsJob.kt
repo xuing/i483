@@ -141,9 +141,10 @@ class SensorAnalyticsProcessor(private val env: StreamExecutionEnvironment) {
         analyticsStream.print("Analytics Results")
 
         // 6. 宿舍房间占用检测
-        val occupancyDetector = OccupancyDetectionEventStream(analyticsStream)
+        val occupancyDetector = OccupancyDetectionEventStream(sensorDataStream,analyticsStream)
         val occupancyEvents = occupancyDetector.detectOccupancyEvents()
-        
+        occupancyEvents.print("Occupancy    Events")
+
         // 输出占用检测结果到控制台
         occupancyEvents.print("Occupancy Detection Results")
 
