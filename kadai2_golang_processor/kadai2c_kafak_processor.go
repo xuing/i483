@@ -14,8 +14,9 @@ import (
 )
 
 const (
-	KafkaBroker = "150.65.230.59:9092"
-	studentID   = "s2510082"
+	KafkaBroker  = "150.65.230.59:9092"
+	studentID    = "s2510082"
+	Co2Threshold = 700 // CO2 threshold in ppm
 )
 
 var sensors = []string{
@@ -32,7 +33,7 @@ var sensors = []string{
 	"DPS310/altitude",
 }
 
-// Data structure definition
+// SensorData Data structure definition
 type SensorData struct {
 	Value     float64
 	Timestamp time.Time
@@ -42,7 +43,7 @@ type SensorData struct {
 var (
 	illuminationData []SensorData
 	dataLock         sync.RWMutex
-	lastCo2Status    string // "above" or "below" records last CO2 status
+	lastCo2Status    = "unknown" // Track last CO2 status for threshold detection
 	statusLock       sync.RWMutex
 )
 
@@ -57,8 +58,9 @@ func sensorToKafka(s string) string {
 // Kafka write function
 func writeToKafka(topic string, message string) error {
 	w := kafka.Writer{
-		Addr:  kafka.TCP(KafkaBroker),
-		Topic: topic,
+		Addr:                   kafka.TCP(KafkaBroker),
+		Topic:                  topic,
+		AllowAutoTopicCreation: true,
 	}
 	defer func(w *kafka.Writer) {
 		err := w.Close()
@@ -93,8 +95,6 @@ func illuminationDataCollector() {
 		Topic:       topic,
 		GroupID:     topic + "-golang_collector",
 		StartOffset: kafka.LastOffset,
-		MinBytes:    1,
-		MaxBytes:    10e6,
 	})
 	defer func(r *kafka.Reader) {
 		err := r.Close()
@@ -144,7 +144,7 @@ func illuminationDataCollector() {
 		illuminationData = filtered
 		dataLock.Unlock()
 
-		fmt.Printf("✅ [Illumination] Received: %.2f (stored %d values)\n", value, len(illuminationData))
+		fmt.Printf("✅ [Illumination] Received: %.2f (stored %d values, timestamp: %s)\n", value, len(illuminationData), m.Time)
 	}
 }
 
@@ -155,10 +155,8 @@ func co2DataCollector() {
 	r := kafka.NewReader(kafka.ReaderConfig{
 		Brokers:     []string{KafkaBroker},
 		Topic:       topic,
-		GroupID:     topic + "golang_collector",
+		GroupID:     topic + "-golang_collector",
 		StartOffset: kafka.LastOffset,
-		MinBytes:    1,
-		MaxBytes:    10e6,
 	})
 	defer func(r *kafka.Reader) {
 		err := r.Close()
@@ -190,7 +188,7 @@ func co2DataCollector() {
 			continue
 		}
 
-		fmt.Printf("✅ [CO2] Received: %.2f ppm\n", value)
+		fmt.Printf("✅ [CO2] Received: %.2f ppm (timestamp: %s)\n", value, m.Time)
 
 		// CO2 threshold detection
 		checkCO2Threshold(value)
@@ -242,7 +240,7 @@ func checkCO2Threshold(co2Value float64) {
 	var currentStatus string
 	var message string
 
-	if co2Value > 700 {
+	if co2Value > Co2Threshold {
 		currentStatus = "above"
 		message = "yes"
 	} else {
@@ -251,22 +249,14 @@ func checkCO2Threshold(co2Value float64) {
 	}
 	// Only send a message when status changes
 	if lastCo2Status != currentStatus {
-		thresholdTopic := "i483-sensors-" + studentID + "-co2_threshold-crossed"
-		avgActuatorTopic := "i483-actuators-" + studentID + "-co2_threshold-crossed"
+		actuatorTopic := "i483-actuators-" + studentID + "-co2_threshold_crossed"
 
-		err := writeToKafka(thresholdTopic, message)
-		if err != nil {
-			log.Printf("❗ [CO2 Threshold] Failed to publish: %v", err)
-		} else {
-			fmt.Printf("🚨 [CO2 Threshold] Status changed: %.2f ppm -> %s (sent: %s)\n",
-				co2Value, currentStatus, message)
-		}
-		err = writeToKafka(avgActuatorTopic, message)
+		err := writeToKafka(actuatorTopic, message)
 		if err != nil {
 			log.Printf("❗ [CO2 Threshold Actuator] Failed to publish: %v", err)
 		} else {
-			fmt.Printf("🚨 [CO2 Threshold Actuator] Status changed: %.2f ppm -> %s (sent: %s)\n",
-				co2Value, currentStatus, message)
+			fmt.Printf("🚨 [CO2 Threshold Actuator] Status changed: %.2f ppm -> %s (sent: %s to %s)\n",
+				co2Value, currentStatus, message, actuatorTopic)
 		}
 
 		lastCo2Status = currentStatus
@@ -280,8 +270,6 @@ func startReader(topic string) {
 		Topic:       topic,
 		GroupID:     topic + "-golang_general_reader",
 		StartOffset: kafka.LastOffset,
-		MinBytes:    1,
-		MaxBytes:    10e6,
 	})
 	defer func(r *kafka.Reader) {
 		err := r.Close()
@@ -314,8 +302,8 @@ func main() {
 	fmt.Println("🚀 Advanced Kafka Sensor Processor starting...")
 	fmt.Printf("📋 Student ID: %s\n", studentID)
 	fmt.Println("🎯 Features:")
-	fmt.Println("   - Rolling Average: BH1750 illumination (every 30s, 5min window)")
-	fmt.Println("   - Threshold Detection: CO2 > 700ppm alert")
+	fmt.Println("   - Rolling Average: BH1750 illumination (every 30s, 5min window) -> published to i483-sensors-s2510082-BH1750_avg-illumination")
+	fmt.Println("   - Threshold Detection: CO2 > 700ppm alert -> published to i483-actuators-s2510082-co2_threshold_crossed")
 	fmt.Println()
 
 	// Initialize status
@@ -331,10 +319,10 @@ func main() {
 	go rollingAverageProcessor()
 
 	// Start general readers for other sensors
-	for _, s := range sensors {
-		topic := makeTopic(s)
-		go startReader(topic)
-	}
+	//for _, s := range sensors {
+	//	topic := makeTopic(s)
+	//	go startReader(topic)
+	//}
 
 	fmt.Println("✅ All processors started successfully!")
 	select {} // Block forever
