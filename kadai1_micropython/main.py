@@ -112,7 +112,7 @@ def mqtt_callback(topic, msg):
     msg = msg.decode() if isinstance(msg, bytes) else msg
 
     print(f"[MQTT] Received topic: {topic}, msg: {msg}")
-    if topic.endswith("/co2_threshold-crossed"):
+    if topic.endswith("/co2_threshold_crossed"):
         led_should_blink = (msg == "yes")
         if not led_should_blink:
             led.value(0)
@@ -124,7 +124,7 @@ def setup_mqtt() -> MQTTClient:
     res = client.connect()
     print(f"MQTT connection result: {res}")
     client.set_callback(mqtt_callback)
-    res = client.subscribe("i483/actuators/s2510082/co2_threshold-crossed")
+    res = client.subscribe("i483/actuators/s2510082/co2_threshold_crossed")
     print(f"MQTT subscribe result: {res}")
     return client
 
