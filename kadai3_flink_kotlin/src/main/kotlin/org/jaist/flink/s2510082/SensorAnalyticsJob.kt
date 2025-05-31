@@ -35,57 +35,6 @@ import java.util.regex.Pattern
 
 
 /**
- * Sensor key for grouping - POJO compatible
- */
-data class SensorKey(
-    var sensorName: String = "",
-    var dataType: String = ""
-)
-
-/**
- * Sensor data class - POJO compatible
- */
-data class SensorData(
-    var sensorName: String = "",
-    var dataType: String = "",
-    var topic: String = "",
-    var timestamp: Long = 0L,
-    var value: Double = 0.0,
-    var studentId: String = ""
-)
-
-/**
- * Aggregated statistics result class - POJO compatible
- */
-data class SensorStats(
-    var sensorName: String = "",
-    var dataType: String = "",
-    var studentId: String = "",
-    var windowStart: Long = 0L,
-    var windowEnd: Long = 0L,
-    var minValue: Double = 0.0,
-    var maxValue: Double = 0.0,
-    var avgValue: Double = 0.0,
-    var count: Long = 0L
-)
-
-data class AnalyticsKafkaRecord(
-    var topic: String = "",
-    var value: String = ""
-)
-
-
-/**
- * Aggregation accumulator
- */
-data class StatsAccumulator(
-    var sum: Double = 0.0,
-    var count: Long = 0,
-    var min: Double = Double.MAX_VALUE,
-    var max: Double = Double.MIN_VALUE
-)
-
-/**
  * Flink Sensor Data Analytics Job
  * 
  * Reads sensor data stream from Kafka, calculates statistics (min, max, avg) for the last 5 minutes every 30 seconds
@@ -116,8 +65,6 @@ object SensorAnalyticsJob {
         }
     }
 }
-
-
 
 /**
  * Sensor Data Analytics Processor
@@ -193,6 +140,13 @@ class SensorAnalyticsProcessor(private val env: StreamExecutionEnvironment) {
         // 5. Output to console (for debugging)
         analyticsStream.print("Analytics Results")
 
+        // 6. 宿舍房间占用检测
+        val occupancyDetector = OccupancyDetectionEventStream(analyticsStream)
+        val occupancyEvents = occupancyDetector.detectOccupancyEvents()
+        
+        // 输出占用检测结果到控制台
+        occupancyEvents.print("Occupancy Detection Results")
+
         // 5. Create Kafka sink for output
         val kafkaSink = createKafkaSink()
         analyticsStream
@@ -237,8 +191,6 @@ class SensorAnalyticsProcessor(private val env: StreamExecutionEnvironment) {
             )
             .build()
     }
-    
-
 
 }
 
