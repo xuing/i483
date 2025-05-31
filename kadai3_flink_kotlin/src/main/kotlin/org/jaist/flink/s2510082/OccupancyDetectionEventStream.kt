@@ -56,55 +56,53 @@ class OccupancyDetectionEventStream(
     }
 
     /**
-     * 处理传感器统计流以检测占用事件
-     * 应用CEP模式匹配来识别基于传感器数据的占用事件
-     *
-     * @return 满足占用检测条件的SensorStats数据流
+     * 主方法：检测占用状态（有人/无人）
+     * - 只要检测到开灯事件或 CO₂ 持续上升事件，状态置为“有人”，并立即输出 true 写 Kafka；
+     * - 如果 1 小时内未再收到“有人”事件，状态置为“无人”，并输出 false 写 Kafka。
      */
     fun detectOccupancyEvents(): DataStream<Boolean> {
         logger.info("开始设置宿舍房间占用检测")
 
-        // 1. 拆分原始流
-        val illuminationStream = sensorAnalyticsStream
-            .filter { it.dataType == "illumination" }
+        // 1. 亮度流过滤（只保留 dataType == "illumination" 的 SensorStats）
+        val illuminationStream: DataStream<SensorStats> = sensorAnalyticsStream
+            .filter { it.dataType.equals("illumination", ignoreCase = true) }
 
-        // 2. 开灯事件流（亮度突增，推断有人）
-        val lightingEvents = detectLightingEvents(illuminationStream)
-        lightingEvents.print("Lighting Events")
+        // 2. 开灯事件：亮度突增
+        val lightingEvents: DataStream<Boolean> = detectLightingEvents(illuminationStream)
+            .map { true }  // 只要检测到事件就输出 true
 
-        //  3.通过co2持续上升判断有人
-        val co2IncreaseStream = sensorDataStream
-            .filter { it.dataType == "co2" }
+        // 3. CO₂ 递增事件：检查过去 5 分钟窗口是否持续递增
+        val co2IncreaseStream: DataStream<Boolean> = sensorDataStream
+            .filter { it.dataType.equals("co2", ignoreCase = true) }
             .keyBy { it.sensorName }
             .window(SlidingEventTimeWindows.of(
                 Duration.ofMinutes(5),
                 Duration.ofMinutes(1)
             ))
-            .process(
-                object : ProcessWindowFunction<SensorData, Boolean, String, TimeWindow>() {
-                    override fun process(
-                        key: String,
-                        context: ProcessWindowFunction<SensorData, Boolean, String, TimeWindow>.Context?,
-                        elements: Iterable<SensorData>,
-                        out: Collector<Boolean>
-                    ) {
-                        val values = elements.map { it.value }
-                        val isIncreasing = values.zipWithNext().all { (a, b) -> a <= b }
-                        out.collect(isIncreasing)
+            .process(object : ProcessWindowFunction<SensorData, Boolean, String, TimeWindow>() {
+                override fun process(
+                    key: String,
+                    context: Context,
+                    elements: Iterable<SensorData>,
+                    out: Collector<Boolean>
+                ) {
+                    val values = elements.map { it.value }
+                    val isIncreasing = values.zipWithNext().all { (a, b) -> a <= b }
+                    if (isIncreasing) {
+                        logger.info("检测到 CO2 持续上升事件（sensor={}，窗口内值={}）", key, values)
+                        out.collect(true)
                     }
                 }
-            ).name("CO2 Increase Detection")
+            }).name("CO2 Increase Detection")
 
-
-        // 4. 合并“开灯”和“CO2上升”事件流，进入状态管理
+        // 4. 合并“开灯事件”与“CO₂ 递增事件”，进入状态机
         val occupancyEventStream: DataStream<Boolean> = lightingEvents
             .union(co2IncreaseStream)
-            .keyBy { "occupancy_state" }  // 使用一个固定的key来管理状态
+            .keyBy { "occupancy_state" }  // 使用一个固定的 key 来聚合所有事件
             .process(object : KeyedProcessFunction<String, Boolean, Boolean>() {
-
-                // 保存当前占用状态：true=有人, false=无人
+                // 保存当前占用状态：true=有⼈, false=无人
                 private val occStateDesc = ValueStateDescriptor<Boolean>("occState", Boolean::class.java)
-                // 保存上次注册的定时器时间戳
+                // 保存当前定时器的时间戳
                 private val timerStateDesc = ValueStateDescriptor<Long>("idleTimer", Long::class.java)
 
                 override fun processElement(
@@ -116,20 +114,17 @@ class OccupancyDetectionEventStream(
                     val timerState = runtimeContext.getState(timerStateDesc)
                     val prev = occState.value() ?: false
 
-                    // 如果当前收到一个“有人”事件，而之前状态是“无人”，则状态切换 -> “有人”
+                    // 如果之前是“无人”，现在收到 true → 状态切换为“有人”
                     if (!prev && value) {
-                        logger.info("Occupancy State: Unoccupied -> Occupied")
+                        logger.info("Occupancy State: Unoccupied → Occupied")
                         occState.update(true)
-                        out.collect(true)  // 写入 Kafka：有人
+                        out.collect(true)  // 向下游（Kafka 等）输出“有人”
                     }
-
-                    // 无论之前状态是什么，只要收到“有人”事件，都要重置（或重注册）超时定时器
-                    // 删除旧定时器（如果存在）
+                    // 只要收到“有人”事件，无论之前状态如何，都要重置超时定时器
                     val prevTimerTs = timerState.value()
                     if (prevTimerTs != null) {
                         ctx.timerService().deleteProcessingTimeTimer(prevTimerTs)
                     }
-                    // 注册一个新的定时器：当前处理时间 + 1 小时
                     val newTimerTs = ctx.timerService().currentProcessingTime() + OCCUPANCY_IDLE_TIMEOUT_MS
                     ctx.timerService().registerProcessingTimeTimer(newTimerTs)
                     timerState.update(newTimerTs)
@@ -138,25 +133,24 @@ class OccupancyDetectionEventStream(
                 override fun onTimer(timestamp: Long, ctx: OnTimerContext, out: Collector<Boolean>) {
                     val occState = runtimeContext.getState(occStateDesc)
                     val prev = occState.value() ?: false
-                    // 定时器触发时，如果当前状态还是“有人”，说明 1 小时内没有新“有人”事件，切换到“无人”
                     if (prev) {
-                        logger.info("Occupancy State: Occupied -> Unoccupied (timeout at {})", timestamp)
+                        logger.info("Occupancy State: Occupied → Unoccupied（超时 {} ms）", OCCUPANCY_IDLE_TIMEOUT_MS)
                         occState.update(false)
-                        out.collect(false)  // 写入 Kafka：无人
+                        out.collect(false)  // 向下游输出“无人”
                     }
-                    // 清空定时器状态
+                    // 定时器只触发一次后，清除状态
                     runtimeContext.getState(timerStateDesc).clear()
                 }
-            })
-            .name("Occupancy State Controller")
+            }).name("Occupancy State Controller")
 
-        // 输出到Kafka
-        occupancyEventStream.sinkTo(createOccupancyKafkaSink()).name("Kafka Occupancy Detection Sink")
+        // 5. 将状态变化流写入 Kafka（只输出 true/false）
+        occupancyEventStream
+            .sinkTo(createOccupancyKafkaSink())
+            .name("Kafka Occupancy Detection Sink")
 
-        // 打印输出流
+        // 6. 返回 occupancyEventStream，以便在外部还可以 print() 或做进一步逻辑
         return occupancyEventStream
     }
-
 
 
     /**
