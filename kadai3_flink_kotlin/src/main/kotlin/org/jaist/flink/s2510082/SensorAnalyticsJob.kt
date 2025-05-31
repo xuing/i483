@@ -180,6 +180,7 @@ class SensorAnalyticsProcessor(private val env: StreamExecutionEnvironment) {
     private fun createKafkaSink(): KafkaSink<AnalyticsKafkaRecord> {
         return KafkaSink.builder<AnalyticsKafkaRecord>()
             .setBootstrapServers(KAFKA_BOOTSTRAP_SERVERS)
+            .setTransactionalIdPrefix("s2510082-sensor-flink-analytics-tx")
             .setRecordSerializer(
                 KafkaRecordSerializationSchema.builder<AnalyticsKafkaRecord>()
                     .setTopicSelector<AnalyticsKafkaRecord> { record ->
