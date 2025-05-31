@@ -10,8 +10,8 @@ import (
 )
 
 const (
-	Partitions = 1 // 一般学生作业1分区即可
-	Replicas   = 1 // 单节点Kafka请设为1
+	Partitions = 1
+	Replicas   = 1
 )
 
 // 创建Topic
@@ -35,7 +35,7 @@ func createTopic(topic string, partitions, replicas int) error {
 
 func main() {
 	topics := []string{
-		"i483-sensors-s2510082-co2_threshold-crossed",
+		"i483-sensors-s2510082-co2_threshold_crossed",
 		"i483-sensors-s2510082-BH1750_avg-illumination",
 	}
 
