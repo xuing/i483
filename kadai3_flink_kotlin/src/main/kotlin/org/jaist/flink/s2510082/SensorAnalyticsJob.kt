@@ -120,7 +120,7 @@ class SensorAnalyticsProcessor(private val env: StreamExecutionEnvironment) {
                         logger.debug("Assigning event time: {} to {}", element.timestamp, element)
                         element.timestamp
                     }
-                    .withIdleness(Duration.ofSeconds(60)) // 防止source分区空闲时水印不前进
+                    .withIdleness(Duration.ofSeconds(60)) // Prevent watermark from not advancing when source partitions are idle
             )
         logger.info("Sensor data stream with watermarks assigned")
 
@@ -140,12 +140,11 @@ class SensorAnalyticsProcessor(private val env: StreamExecutionEnvironment) {
         // 5. Output to console (for debugging)
         analyticsStream.print("Analytics Results")
 
-        // 6. 宿舍房间占用检测
+        // 6. Dormitory room occupancy detection
         val occupancyDetector = OccupancyDetectionEventStream(sensorDataStream,analyticsStream)
         val occupancyEvents = occupancyDetector.detectOccupancyEvents()
-        occupancyEvents.print("Occupancy    Events")
 
-        // 输出占用检测结果到控制台
+        // Output occupancy detection results to console
         occupancyEvents.print("Occupancy Detection Results")
 
         // 5. Create Kafka sink for output

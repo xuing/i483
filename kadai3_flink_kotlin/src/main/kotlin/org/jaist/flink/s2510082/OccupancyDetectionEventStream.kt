@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory
 import java.time.Duration
 
 /**
- * 创建占用状态Kafka输出
+ * Create Kafka sink for occupancy state output
  */
 private fun createOccupancyKafkaSink(): KafkaSink<Boolean> {
     return KafkaSink.builder<Boolean>()
@@ -40,13 +40,13 @@ private fun createOccupancyKafkaSink(): KafkaSink<Boolean> {
 }
 
 /**
- * CO2递增检测器
+ * CO2 increase detector
  */
 class CO2IncreaseDetector : ProcessWindowFunction<SensorData, Boolean, String, TimeWindow>() {
     
     companion object {
         private val logger = LoggerFactory.getLogger(CO2IncreaseDetector::class.java)
-        private const val MIN_DATA_POINTS = 3 // 至少需要3个数据点才能判断趋势
+        private const val MIN_DATA_POINTS = 3 // Minimum 3 data points required to determine trend
     }
     
     override fun process(
@@ -55,20 +55,20 @@ class CO2IncreaseDetector : ProcessWindowFunction<SensorData, Boolean, String, T
         elements: Iterable<SensorData>,
         out: Collector<Boolean>
     ) {
-        // 按时间戳排序获取传感器数值序列
+        // Sort by timestamp to get sensor value sequence
         val sortedData = elements.sortedBy { it.timestamp }
         val values = sortedData.map { it.value }
         
-        // 至少需要3个数据点才能判断递增趋势
+        // At least 3 data points required to determine increasing trend
         if (values.size < MIN_DATA_POINTS) {
             return
         }
         
-        // 检查是否递增（允许相等）
+        // Check if values are increasing (equal values allowed)
         val isIncreasing = values.zipWithNext().all { (a, b) -> a <= b }
         
         if (isIncreasing) {
-            logger.info("检测到CO2持续上升 - 传感器: {}, 数据点: {}, 值范围: {}-{}", 
+            logger.info("CO2 continuous increase detected - Sensor: {}, Data points: {}, Value range: {}-{}", 
                 key, values.size, values.first(), values.last())
             out.collect(true)
         }
@@ -76,13 +76,13 @@ class CO2IncreaseDetector : ProcessWindowFunction<SensorData, Boolean, String, T
 }
 
 /**
- * 占用状态管理器
+ * Occupancy state manager
  */
 class OccupancyStateManager : KeyedProcessFunction<String, Boolean, Boolean>() {
     
     companion object {
         private val logger = LoggerFactory.getLogger(OccupancyStateManager::class.java)
-        private const val IDLE_TIMEOUT_MS = 60 * 60 * 1000L // 1小时超时
+        private const val IDLE_TIMEOUT_MS = 60 * 60 * 1000L // 1 hour timeout
     }
     
     private lateinit var occState: ValueState<Boolean>
@@ -103,29 +103,29 @@ class OccupancyStateManager : KeyedProcessFunction<String, Boolean, Boolean>() {
         ctx: Context,
         out: Collector<Boolean>
     ) {
-        // 只处理"有人"事件
+        // Only process "occupied" events
         if (!value) return
         
         val wasOccupied = occState.value() ?: false
         
-        // 状态变化：无人 -> 有人
+        // State change: unoccupied -> occupied
         if (!wasOccupied) {
-            logger.info("房间状态变更: 无人 -> 有人")
+            logger.info("Room state changed: unoccupied -> occupied")
             occState.update(true)
             out.collect(true)
         }
         
-        // 重置超时定时器
+        // Reset idle timeout timer
         resetIdleTimer(ctx)
     }
     
     private fun resetIdleTimer(ctx: Context) {
-        // 删除旧定时器
+        // Delete old timer
         timerState.value()?.let { oldTimer ->
             ctx.timerService().deleteProcessingTimeTimer(oldTimer)
         }
         
-        // 注册新定时器
+        // Register new timer
         val newTimer = ctx.timerService().currentProcessingTime() + IDLE_TIMEOUT_MS
         ctx.timerService().registerProcessingTimeTimer(newTimer)
         timerState.update(newTimer)
@@ -135,18 +135,18 @@ class OccupancyStateManager : KeyedProcessFunction<String, Boolean, Boolean>() {
         val isOccupied = occState.value() ?: false
         
         if (isOccupied) {
-            logger.info("房间状态变更: 有人 -> 无人 (超时: {}小时)", IDLE_TIMEOUT_MS / (60 * 60 * 1000))
+            logger.info("Room state changed: occupied -> unoccupied (timeout: {} hours)", IDLE_TIMEOUT_MS / (60 * 60 * 1000))
             occState.update(false)
             out.collect(false)
         }
         
-        // 清理定时器状态
+        // Clear timer state
         timerState.clear()
     }
 }
 
 /**
- * 宿舍房间占用检测事件流处理器
+ * Dormitory room occupancy detection event stream processor
  */
 class OccupancyDetectionEventStream(
     private val sensorDataStream: DataStream<SensorData>,
@@ -156,35 +156,35 @@ class OccupancyDetectionEventStream(
     companion object {
         private val logger = LoggerFactory.getLogger(OccupancyDetectionEventStream::class.java)
         
-        // 检测阈值配置
+        // Detection threshold configuration
         private const val LIGHT_SUDDEN_INCREASE_THRESHOLD = 100.0
         
-        // 窗口配置
+        // Window configuration
         private val CO2_WINDOW_SIZE = Duration.ofMinutes(5)
         private val CO2_SLIDE_SIZE = Duration.ofMinutes(1)
         private val LIGHT_DETECTION_WINDOW = Duration.ofMinutes(1)
     }
     
     /**
-     * 主检测方法
+     * Main detection method
      */
     fun detectOccupancyEvents(): DataStream<Boolean> {
-        logger.info("启动宿舍房间占用检测系统")
+        logger.info("Starting dormitory room occupancy detection system")
         
-        // 1. 检测开灯事件
+        // 1. Detect lighting events
         val lightingEvents = detectLightingEvents()
         
-        // 2. 检测CO2上升事件
+        // 2. Detect CO2 increase events
         val co2Events = detectCO2IncreaseEvents()
         
-        // 3. 合并事件流并管理状态
+        // 3. Merge event streams and manage state
         val occupancyStream = lightingEvents
             .union(co2Events)
-            .keyBy { "global-occupancy" } // 全局状态管理
+            .keyBy { "global-occupancy" } // Global state management
             .process(OccupancyStateManager())
             .name("Occupancy State Manager")
         
-        // 4. 输出到Kafka
+        // 4. Output to Kafka
         occupancyStream
             .sinkTo(createOccupancyKafkaSink())
             .name("Kafka Occupancy Sink")
@@ -193,7 +193,7 @@ class OccupancyDetectionEventStream(
     }
     
     /**
-     * 检测开灯事件
+     * Detect lighting events
      */
     private fun detectLightingEvents(): DataStream<Boolean> {
         val illuminationStream = sensorAnalyticsStream
@@ -208,7 +208,7 @@ class OccupancyDetectionEventStream(
         return CEP.pattern(illuminationStream, lightPattern)
             .select { matchedEvents ->
                 val lightEvent = matchedEvents["light_on"]!![0]
-                logger.info("检测到开灯事件 - 传感器: {}, 亮度变化: {}", 
+                logger.info("Lighting event detected - Sensor: {}, Brightness change: {}", 
                     lightEvent.sensorName, lightEvent.maxValue - lightEvent.minValue)
                 true
             }
@@ -216,7 +216,7 @@ class OccupancyDetectionEventStream(
     }
     
     /**
-     * 检测CO2上升事件
+     * Detect CO2 increase events
      */
     private fun detectCO2IncreaseEvents(): DataStream<Boolean> {
         return sensorDataStream
