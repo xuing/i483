@@ -92,11 +92,11 @@ under the License.
             somehow we need the flink-connector-base too for the kafka connector...
         -->
 
-        <dependency>
-            <groupId>org.apache.flink</groupId>
-            <artifactId>flink-sql-connector-kafka</artifactId>
-            <version>4.0.0-2.0</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.apache.flink</groupId>-->
+<!--            <artifactId>flink-sql-connector-kafka</artifactId>-->
+<!--            <version>4.0.0-2.0</version>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-connector-base</artifactId>
@@ -241,7 +241,12 @@ under the License.
                             <createDependencyReducedPom>false</createDependencyReducedPom>
                             <artifactSet>
                                 <excludes>
-                                    <exclude>org.apache.flink:*</exclude>
+                                    <exclude>org.apache.flink:flink-streaming-java</exclude>
+                                    <exclude>org.apache.flink:flink-clients</exclude>
+                                    <exclude>org.apache.flink:flink-runtime-web</exclude>
+                                    <exclude>org.apache.flink:flink-cep</exclude>
+                                    <exclude>org.apache.flink:flink-connector-base</exclude>
+                                    <exclude>org.apache.flink:flink-scala_2.12</exclude>
                                     <exclude>org.apache.flink:flink-shaded-force-shading</exclude>
                                     <exclude>com.google.code.findbugs:jsr305</exclude>
                                 </excludes>

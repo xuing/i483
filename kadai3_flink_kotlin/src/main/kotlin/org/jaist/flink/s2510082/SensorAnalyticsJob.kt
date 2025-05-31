@@ -96,7 +96,7 @@ class SensorAnalyticsProcessor(private val env: StreamExecutionEnvironment) {
             kafkaSource,
             WatermarkStrategy.noWatermarks(), // No watermarks for raw data
             "sensor-data-source"
-        )
+        ).name("Kafka Sensor Data Source")
 
         // 3. Parse raw data into SensorData objects and assign watermarks
         val sensorDataStream = rawDataStream
@@ -121,7 +121,7 @@ class SensorAnalyticsProcessor(private val env: StreamExecutionEnvironment) {
                         element.timestamp
                     }
                     .withIdleness(Duration.ofSeconds(60)) // Prevent watermark from not advancing when source partitions are idle
-            )
+            ).name("Parse and Assign Watermarks")
         logger.info("Sensor data stream with watermarks assigned")
 
         // 4. Group by sensor type and measurement type, apply sliding window
@@ -135,7 +135,7 @@ class SensorAnalyticsProcessor(private val env: StreamExecutionEnvironment) {
             .aggregate(
                 SensorStatsAggregateFunction(),
                 SensorStatsProcessWindowFunction()
-            )
+            ).name("Sensor Stats Aggregation")
 
         // 5. Output to console (for debugging)
         analyticsStream.print("Analytics Results")

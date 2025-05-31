@@ -3,7 +3,7 @@ package org.jaist.flink.s2510082
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.connector.kafka.source.reader.deserializer.KafkaRecordDeserializationSchema
 import org.apache.flink.util.Collector
-import org.apache.flink.kafka.shaded.org.apache.kafka.clients.consumer.ConsumerRecord
+import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
 
 /**
