@@ -16,3 +16,5 @@
 
 - If neither event is detected for 1 hour, mark the room as “unoccupied”.
 
+# Flink Dashboard 
+http://150.65.181.175:8081
