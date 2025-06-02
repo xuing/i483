@@ -4,6 +4,7 @@ package org.jaist.flink.s2510082
  * Sensor key for grouping - POJO compatible
  */
 data class SensorKey(
+    var studentId: String = "",
     var sensorName: String = "",
     var dataType: String = ""
 )

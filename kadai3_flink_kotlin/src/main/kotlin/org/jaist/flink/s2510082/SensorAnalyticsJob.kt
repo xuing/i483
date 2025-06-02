@@ -77,6 +77,7 @@ class SensorAnalyticsProcessor(private val env: StreamExecutionEnvironment) {
         // Configuration constants
         private const val KAFKA_BOOTSTRAP_SERVERS = "150.65.230.59:9092"
         private const val INPUT_TOPIC_PATTERN = "i483-sensors-s2510082-[A-Z0-9]+-[a-zA-Z0-9_]+"
+        private const val INPUT_ALL_STUDENTS_TOPIC_PATTERN = "i483-sensors-s[0-9]+-[A-Z0-9]+-[a-zA-Z0-9_]+"
         private const val OUTPUT_TOPIC_PREFIX = "i483-sensors-s2510082-analytics"
         private const val JOB_NAME = "Sensor Analytics Job"
         
@@ -86,10 +87,9 @@ class SensorAnalyticsProcessor(private val env: StreamExecutionEnvironment) {
     }
 
     fun execute() {
-        logger.info("Setting up Kafka source with pattern: $INPUT_TOPIC_PATTERN")
 
         // 1. Create Kafka source
-        val kafkaSource = createKafkaSource()
+        val kafkaSource = createKafkaSource(INPUT_ALL_STUDENTS_TOPIC_PATTERN)
 
         // 2. Read raw data stream from Kafka
         val rawDataStream = env.fromSource(
@@ -127,7 +127,7 @@ class SensorAnalyticsProcessor(private val env: StreamExecutionEnvironment) {
         // 4. Group by sensor type and measurement type, apply sliding window
         val analyticsStream = sensorDataStream
             .keyBy {
-                val key = SensorKey(it.sensorName, it.dataType)
+                val key = SensorKey(it.studentId,it.sensorName, it.dataType)
                 logger.debug("Grouping data by key: {}, data: {}", key, it)
                 key
             }
@@ -151,11 +151,17 @@ class SensorAnalyticsProcessor(private val env: StreamExecutionEnvironment) {
         val kafkaSink = createKafkaSink()
         analyticsStream
             .flatMap {stats, out: Collector<AnalyticsKafkaRecord> ->
-                assert(stats.studentId == "s2510082") { "Student ID must be s2510082" }
-                val baseTopic = "${OUTPUT_TOPIC_PREFIX}-${stats.sensorName}"
-                out.collect(AnalyticsKafkaRecord("${baseTopic}_min-${stats.dataType}", stats.minValue.toString()))
-                out.collect(AnalyticsKafkaRecord("${baseTopic}_max-${stats.dataType}", stats.maxValue.toString()))
-                out.collect(AnalyticsKafkaRecord("${baseTopic}_avg-${stats.dataType}", stats.avgValue.toString()))
+                if (stats.studentId == "s2510082") {
+                    val baseTopic = "${OUTPUT_TOPIC_PREFIX}-${stats.sensorName}"
+                    out.collect(AnalyticsKafkaRecord("${baseTopic}_min-${stats.dataType}", stats.minValue.toString()))
+                    out.collect(AnalyticsKafkaRecord("${baseTopic}_max-${stats.dataType}", stats.maxValue.toString()))
+                    out.collect(AnalyticsKafkaRecord("${baseTopic}_avg-${stats.dataType}", stats.avgValue.toString()))
+                }
+//                i483-sensors-s2510082-analytics-s2510082_BH1750_AVG_avg-illumination
+//                項目 1a の適切なトピックは i483-sensors-[学背番号]-analytics-[STUDENT_SENSOR_[min|max|avg]-[DATA_TYPE]に規定する。
+                out.collect(AnalyticsKafkaRecord("${OUTPUT_TOPIC_PREFIX}-${stats.studentId}_${stats.sensorName}_min-${stats.dataType}", stats.minValue.toString()))
+                out.collect(AnalyticsKafkaRecord("${OUTPUT_TOPIC_PREFIX}-${stats.studentId}_${stats.sensorName}_max-${stats.dataType}", stats.maxValue.toString()))
+                out.collect(AnalyticsKafkaRecord("${OUTPUT_TOPIC_PREFIX}-${stats.studentId}_${stats.sensorName}_avg-${stats.dataType}", stats.avgValue.toString()))
             }
             .returns(Types.POJO(AnalyticsKafkaRecord::class.java))
             .sinkTo(kafkaSink)
@@ -166,10 +172,11 @@ class SensorAnalyticsProcessor(private val env: StreamExecutionEnvironment) {
         env.execute(JOB_NAME)
     }
     
-    private fun createKafkaSource(): KafkaSource<String> {
+    private fun createKafkaSource(topic_pattern: String): KafkaSource<String> {
+        logger.info("Setting up Kafka source with pattern: $topic_pattern")
         return KafkaSource.builder<String>()
             .setBootstrapServers(KAFKA_BOOTSTRAP_SERVERS)
-            .setTopicPattern(Pattern.compile(INPUT_TOPIC_PATTERN))
+            .setTopicPattern(Pattern.compile(topic_pattern))
             .setDeserializer(ConsumerRecordDeserializer())
             .setStartingOffsets(OffsetsInitializer.latest())
             .setGroupId("s2510082-sensor-flink-analytics-group")
@@ -235,7 +242,7 @@ object SensorDataParser {
     /**
      * Parse sensor data
      * Input format: "topic,timestamp,value"
-     * Topic format: "i483-sensors-s2510082-SensorName-DataType"
+     * Topic format: "i483-sensors-studentId-SensorName-DataType"
      */
     fun parseSensorData(rawData: String): SensorData? {
         try {
@@ -261,14 +268,14 @@ object SensorDataParser {
             }
             
             // Parse topic to extract sensor information
-            // Format: i483-sensors-s2510082-SensorName-DataType
+            // Format: i483-sensors-studentId-SensorType-DataType
             val topicParts = topic.split("-")
-            if (topicParts.size != 5 || topicParts[0] != "i483" || topicParts[1] != "sensors" || topicParts[2] != "s2510082") {
+            if (topicParts.size != 5 || topicParts[0] != "i483" || topicParts[1] != "sensors") {
                 logger.warn("Invalid topic format: $topic, parts: ${topicParts.size}")
                 return null
             }
             
-            val studentId = topicParts[2] // s2510082
+            val studentId = topicParts[2] // Student ID
             val sensorType = topicParts[3] // SensorType
             val dataType = topicParts[4] // DataType
             
@@ -322,7 +329,7 @@ class SensorStatsProcessWindowFunction : ProcessWindowFunction<StatsAccumulator,
             val stats = SensorStats(
                 sensorName = key.sensorName,
                 dataType = key.dataType,
-                studentId = "s2510082",
+                studentId = key.studentId,
                 windowStart = context.window().start,
                 windowEnd = context.window().end,
                 minValue = accumulator.min,
