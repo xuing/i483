@@ -28,11 +28,9 @@ private fun createOccupancyKafkaSink(): KafkaSink<Boolean> {
         .setRecordSerializer(
             KafkaRecordSerializationSchema.builder<Boolean>()
                 .setTopic("i483-sensors-s2510082-analytics-occupancy_detection")
-                .setValueSerializationSchema(object : SerializationSchema<Boolean> {
-                    override fun serialize(element: Boolean): ByteArray {
-                        val status = if (element) "Occupied" else "Unoccupied"
-                        return status.toByteArray(Charsets.UTF_8)
-                    }
+                .setValueSerializationSchema(SerializationSchema { element ->
+                    val status = if (element) "Occupied" else "Unoccupied"
+                    status.toByteArray(Charsets.UTF_8)
                 })
                 .build()
         )
